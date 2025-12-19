@@ -40,14 +40,14 @@ const prompt = ai.definePrompt({
   Location: {{location}}
   AQI: {{aqi}}
 
-  Generate 3 extremely short, punchy, and easy-to-understand examples of the AQI's impact. Format them like "Category: Value".
+  Generate 3 extremely short, punchy, and easy-to-understand examples of the AQI's impact. Format them like "Category: Value". These should be fixed, relatable comparisons, not jargon-heavy.
 
-  Think outside the box! Instead of just "cigarettes", how about:
-  - "Basically smoked: X cigarettes."
-  - "Like licking a bus exhaust for: Y minutes."
-  - "Your lungs are working like they're: Z years older."
+  Use these three categories for your comparisons:
+  1.  "Basically smoked: X cigarettes."
+  2.  "Like inhaling exhaust from heavy traffic for: Y minutes."
+  3.  "Your lungs are working like they're: Z years older."
 
-  Be creative, be memorable, but keep it very short. The goal is to make someone say "Whoa!"
+  Be creative with the values, but stick to the categories. The goal is to make someone say "Whoa!"
   `,
 });
 
