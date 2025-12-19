@@ -14,7 +14,7 @@ import {
   BrainCircuit,
   Cigarette,
   HeartPulse,
-  Lung,
+  Activity,
   RefreshCcw,
 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -25,7 +25,7 @@ function getIconForExample(example: string) {
     return <Cigarette className="w-6 h-6 text-primary shrink-0" />;
   }
   if (lowerExample.includes('lung')) {
-    return <Lung className="w-6 h-6 text-primary shrink-0" />;
+    return <Activity className="w-6 h-6 text-primary shrink-0" />;
   }
   if (lowerExample.includes('heart') || lowerExample.includes('pulse')) {
     return <HeartPulse className="w-6 h-6 text-primary shrink-0" />;
