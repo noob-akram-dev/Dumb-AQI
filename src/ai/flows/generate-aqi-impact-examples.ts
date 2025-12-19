@@ -20,7 +20,7 @@ const GenerateAqiImpactExamplesOutputSchema = z.object({
   examples: z
     .array(z.string())
     .describe(
-      'A list of 3 very short, relatable examples of the AQI impact, like "Cigarettes smoked: 2".'
+      'A list of 3 very short, relatable examples of the AQI impact, like "Basically smoked: 2 cigarettes".'
     ),
 });
 export type GenerateAqiImpactExamplesOutput = z.infer<typeof GenerateAqiImpactExamplesOutputSchema>;
@@ -35,20 +35,19 @@ const prompt = ai.definePrompt({
   name: 'generateAqiImpactExamplesPrompt',
   input: {schema: GenerateAqiImpactExamplesInputSchema},
   output: {schema: GenerateAqiImpactExamplesOutputSchema},
-  prompt: `You are an expert in environmental health communication. Your task is to generate 3 short, relatable examples of the impact of an Air Quality Index (AQI) value.
+  prompt: `You are a witty and slightly sassy environmental bot. Your mission is to translate boring Air Quality Index (AQI) numbers into shockingly relatable comparisons that make people pay attention.
 
   Location: {{location}}
   AQI: {{aqi}}
 
-  The examples must be very concise and formatted like "Category: Value".
-  For example: "Cigarettes smoked: 4".
+  Generate 3 extremely short, punchy, and easy-to-understand examples of the AQI's impact. Format them like "Category: Value".
 
-  Generate 3 different examples. Examples could include:
-  - Equivalent number of cigarettes smoked.
-  - Time spent near heavy traffic.
-  - Reduced lung function percentage for a day.
+  Think outside the box! Instead of just "cigarettes", how about:
+  - "Basically smoked: X cigarettes."
+  - "Like licking a bus exhaust for: Y minutes."
+  - "Your lungs are working like they're: Z years older."
 
-  Keep the examples impactful and easy to understand. Avoid technical jargon or long sentences.
+  Be creative, be memorable, but keep it very short. The goal is to make someone say "Whoa!"
   `,
 });
 
