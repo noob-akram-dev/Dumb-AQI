@@ -72,7 +72,7 @@ export function AqiResultCard({
         >
           <AlertTriangle
             className="w-8 h-8 mr-4 shrink-0"
-            style={{ color: aqiInfo.color }}
+            style={{ color: aqiInfo.color.slice(0, -2) }}
           />
           <div>
             <h3 className="font-bold text-lg text-card-foreground/90">
@@ -88,7 +88,7 @@ export function AqiResultCard({
         <div>
           <h3 className="flex items-center font-headline text-xl sm:text-2xl mb-4">
             <BrainCircuit className="w-7 h-7 mr-2 text-primary" />
-            What This Actually Means
+            Impact Over 24 Hours
           </h3>
           <ul className="space-y-4">
             {aqiData.examples.map((example, index) => (
