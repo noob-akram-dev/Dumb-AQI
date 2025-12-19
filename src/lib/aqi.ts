@@ -9,7 +9,7 @@ export function getAqiInfo(aqi: number): AqiInfo {
     return { level: 'Good', color: '#00E400', textColor: '#000000' };
   }
   if (aqi <= 100) {
-    return { level: 'Moderate', color: '#FFFF00', textColor: '#000000' };
+    return { level: 'Moderate', color: '#CCCC00', textColor: '#000000' };
   }
   if (aqi <= 150) {
     return {
