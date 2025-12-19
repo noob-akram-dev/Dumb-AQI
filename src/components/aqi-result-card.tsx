@@ -48,8 +48,8 @@ export function AqiResultCard({
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
           <div>
-            <CardDescription>AQI in {aqiData.city}</CardDescription>
-            <CardTitle className="text-3xl font-headline flex items-center gap-2">
+            <CardDescription className="text-foreground/80">AQI in {aqiData.city}</CardDescription>
+            <CardTitle className="text-3xl font-headline flex items-center gap-2 text-foreground">
               <Wind className="w-6 h-6 text-muted-foreground" />
               <span>{aqiData.aqi}</span>
             </CardTitle>
