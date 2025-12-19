@@ -2,10 +2,7 @@
 
 import { generateAqiImpactExamples } from '@/ai/flows/generate-aqi-impact-examples';
 import type { AqiData } from '@/lib/types';
-
-// The API key is set to 'demo' as a placeholder.
-// For a production app, you should get a real key from https://aqicn.org/api/
-const WAQI_API_TOKEN = process.env.WAQI_API_TOKEN || 'demo';
+import { XMLParser } from 'fast-xml-parser';
 
 type LocationInput = {
   lat?: number;
@@ -13,37 +10,105 @@ type LocationInput = {
   city?: string;
 };
 
+// Haversine formula to calculate distance between two lat/lon points
+const getDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
 export async function getAqiData(
   location: LocationInput
 ): Promise<AqiData | { error: string }> {
-  let url = '';
-  if (location.lat !== undefined && location.lon !== undefined) {
-    url = `https://api.waqi.info/feed/geo:${location.lat};${location.lon}/?token=${WAQI_API_TOKEN}`;
-  } else if (location.city) {
-    url = `https://api.waqi.info/feed/${encodeURIComponent(
-      location.city
-    )}/?token=${WAQI_API_TOKEN}`;
-  } else {
-    return { error: 'No location provided.' };
-  }
+  const url = 'https://airquality.cpcb.gov.in/caaqms/rss_feed';
 
   try {
     const response = await fetch(url, { next: { revalidate: 3600 } }); // Cache for 1 hour
     if (!response.ok) {
       throw new Error(`Failed to fetch AQI data. Status: ${response.status}`);
     }
-    const data = await response.json();
+    const xmlData = await response.text();
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '',
+    });
+    const jsonData = parser.parse(xmlData);
 
-    if (data.status !== 'ok') {
+    const allStations: any[] = [];
+    const states = Array.isArray(jsonData.AqIndex.Country.State)
+      ? jsonData.AqIndex.Country.State
+      : [jsonData.AqIndex.Country.State];
+
+    for (const state of states) {
+      const cities = Array.isArray(state.City) ? state.City : [state.City];
+      for (const city of cities) {
+        const stations = Array.isArray(city.Station)
+          ? city.Station
+          : [city.Station];
+        for (const station of stations) {
+          allStations.push({
+            ...station,
+            city: city.id,
+            state: state.id,
+          });
+        }
+      }
+    }
+
+    if (allStations.length === 0) {
+      return { error: 'No AQI stations found in the data source.' };
+    }
+
+    let targetStation: any;
+
+    if (location.lat !== undefined && location.lon !== undefined) {
+      let closestStation: any = null;
+      let minDistance = Infinity;
+
+      for (const station of allStations) {
+        const lat = parseFloat(station.latitude);
+        const lon = parseFloat(station.longitude);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          const distance = getDistance(location.lat, location.lon, lat, lon);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestStation = station;
+          }
+        }
+      }
+      targetStation = closestStation;
+    } else if (location.city) {
+      const searchCity = location.city.toLowerCase().replace(/_/g, ' ');
+      targetStation = allStations.find(
+        (s) => s.city.toLowerCase().replace(/_/g, ' ') === searchCity
+      );
+    }
+
+    if (!targetStation) {
       return {
-        error: data.data || 'Could not find AQI data for this location.',
+        error: `Could not find AQI data for "${
+          location.city || 'your location'
+        }".`,
       };
     }
 
-    const aqi = data.data.aqi;
-    const city = data.data.city.name;
+    const aqi = parseInt(targetStation.Air_Quality_Index?.Value, 10);
+    const city = targetStation.city.replace(/_/g, ' ');
 
-    if (typeof aqi !== 'number') {
+    if (isNaN(aqi)) {
       return { error: 'AQI data is not available for this station.' };
     }
 
@@ -54,7 +119,7 @@ export async function getAqiData(
 
     return {
       aqi,
-      city,
+      city: `${targetStation.id}, ${city}`,
       examples: impactResult.examples,
     };
   } catch (error) {
