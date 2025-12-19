@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -19,39 +18,106 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { getAqiData } from '@/app/actions';
+import { getAqiData, getStates, getCities, getStations } from '@/app/actions';
 import type { AqiData } from '@/lib/types';
 import { AqiResultCard } from '@/components/aqi-result-card';
 import { ImpactCard } from '@/components/impact-card';
 import { LoaderCircle, MapPin } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const formSchema = z.object({
-  location: z.string().min(1, 'Please enter a location.'),
+  state: z.string().min(1, 'Please select a state.'),
+  city: z.string().min(1, 'Please select a city.'),
+  station: z.string().min(1, 'Please select a station.'),
 });
+
+type LocationSelectItem = {
+  id: string;
+  name: string;
+};
 
 export function AqiDashboard() {
   const [data, setData] = useState<AqiData | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const [states, setStates] = useState<LocationSelectItem[]>([]);
+  const [cities, setCities] = useState<LocationSelectItem[]>([]);
+  const [stations, setStations] = useState<LocationSelectItem[]>([]);
+
+  const [loadingStates, setLoadingStates] = useState(true);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      location: '',
+      state: '',
+      city: '',
+      station: '',
     },
   });
+
+  const selectedState = form.watch('state');
+  const selectedCity = form.watch('city');
+
+  useEffect(() => {
+    const fetchStates = async () => {
+      setLoadingStates(true);
+      const statesData = await getStates();
+      setStates(statesData);
+      setLoadingStates(false);
+    };
+    fetchStates();
+  }, []);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (selectedState) {
+        setLoading(true);
+        form.resetField('city');
+        form.resetField('station');
+        setCities([]);
+        setStations([]);
+        const citiesData = await getCities(selectedState);
+        setCities(citiesData);
+        setLoading(false);
+      }
+    };
+    fetchCities();
+  }, [selectedState, form]);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      if (selectedState && selectedCity) {
+        setLoading(true);
+        form.resetField('station');
+        setStations([]);
+        const stationsData = await getStations(selectedState, selectedCity);
+        setStations(stationsData);
+        setLoading(false);
+      }
+    };
+    fetchStations();
+  }, [selectedState, selectedCity, form]);
 
   const handleFetchAqi = async (location: {
     lat?: number;
     lon?: number;
+    state?: string;
     city?: string;
+    station?: string;
   }) => {
     setLoading(true);
     setData(null);
-    form.reset({ location: '' });
 
     const result = await getAqiData(location);
 
@@ -76,9 +142,11 @@ export function AqiDashboard() {
       });
       return;
     }
+    form.reset();
+    setCities([]);
+    setStations([]);
+    handleFetchAqi({ lat: 0, lon: 0 }); // Will trigger getCurrentPosition
 
-    setLoading(true);
-    setData(null);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         handleFetchAqi({
@@ -98,7 +166,11 @@ export function AqiDashboard() {
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    handleFetchAqi({ city: values.location });
+    handleFetchAqi({
+      state: values.state,
+      city: values.city,
+      station: values.station,
+    });
   };
 
   return (
@@ -108,7 +180,7 @@ export function AqiDashboard() {
           Dumb AQI
         </h1>
         <p className="text-muted-foreground mt-2 text-lg">
-          Air quality, explained in a way you can actually understand.
+          Air quality for India, explained in a way you can actually understand.
         </p>
       </header>
 
@@ -116,7 +188,7 @@ export function AqiDashboard() {
         <CardHeader>
           <CardTitle>Check Air Quality</CardTitle>
           <CardDescription>
-            Use your current location or enter a city name.
+            Use your current location or select a location in India.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -139,22 +211,107 @@ export function AqiDashboard() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex items-start gap-4"
+              className="space-y-4"
             >
               <FormField
                 control={form.control}
-                name="location"
+                name="state"
                 render={({ field }) => (
-                  <FormItem className="flex-grow">
-                    <FormControl>
-                      <Input placeholder="e.g., New York" {...field} />
-                    </FormControl>
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={loadingStates || loading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a state" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {states.map((state) => (
+                          <SelectItem key={state.id} value={state.id}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={loading} className="shrink-0">
-                {loading && !data ? (
+
+              {selectedState && (
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City / District</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={!selectedState || loading || cities.length === 0}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a city/district" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cities.map((city) => (
+                            <SelectItem key={city.id} value={city.id}>
+                              {city.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {selectedCity && (
+                <FormField
+                  control={form.control}
+                  name="station"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Monitoring Station</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={
+                          !selectedCity || loading || stations.length === 0
+                        }
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a station" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {stations.map((station) => (
+                            <SelectItem key={station.id} value={station.id}>
+                              {station.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading || !form.formState.isValid}
+                className="w-full"
+              >
+                {loading ? (
                   <LoaderCircle className="animate-spin" />
                 ) : (
                   'Get Dumb AQI'
