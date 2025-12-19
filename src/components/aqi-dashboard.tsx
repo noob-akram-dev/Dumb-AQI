@@ -25,7 +25,6 @@ import { useToast } from '@/hooks/use-toast';
 import { getAqiData, getStates, getCities, getStations } from '@/app/actions';
 import type { AqiData } from '@/lib/types';
 import { AqiResultCard } from '@/components/aqi-result-card';
-import { ImpactCard } from '@/components/impact-card';
 import { LoaderCircle, MapPin } from 'lucide-react';
 import {
   Select,
@@ -175,152 +174,183 @@ export function AqiDashboard() {
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8">
-      <header className="text-center">
-        <h1 className="font-headline text-5xl font-bold text-primary">
-          Dumb AQI
-        </h1>
-        <p className="text-muted-foreground mt-2 text-lg">
-          Air quality for India, explained in a way you can actually understand.
-        </p>
-      </header>
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>Check Air Quality</CardTitle>
-          <CardDescription>
-            Use your current location or select a location in India.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            onClick={handleUseMyLocation}
-            disabled={loading}
-            className="w-full"
-            variant="outline"
+      <AnimatePresence mode="wait">
+        {data ? (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
           >
-            <MapPin className="mr-2 h-4 w-4" /> Use My Current Location
-          </Button>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
-            </div>
-          </div>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      disabled={loadingStates || loading}
+            <AqiResultCard
+              aqiData={data}
+              onReset={() => {
+                setData(null);
+                form.reset();
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-8"
+          >
+            <header className="text-center">
+              <h1 className="font-headline text-5xl font-bold text-primary">
+                Dumb AQI
+              </h1>
+              <p className="text-muted-foreground mt-2 text-lg">
+                Air quality for India, explained in a way you can actually
+                understand.
+              </p>
+            </header>
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Check Air Quality</CardTitle>
+                <CardDescription>
+                  Use your current location or select a location in India.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={handleUseMyLocation}
+                  disabled={loading}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <MapPin className="mr-2 h-4 w-4" /> Use My Current Location
+                </Button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      Or
+                    </span>
+                  </div>
+                </div>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            disabled={loadingStates || loading}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a state" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {states.map((state) => (
+                                <SelectItem key={state.id} value={state.id}>
+                                  {state.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {selectedState && (
+                      <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City / District</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              disabled={
+                                !selectedState || loading || cities.length === 0
+                              }
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a city/district" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {cities.map((city) => (
+                                  <SelectItem key={city.id} value={city.id}>
+                                    {city.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {selectedCity && (
+                      <FormField
+                        control={form.control}
+                        name="station"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monitoring Station</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              disabled={
+                                !selectedCity || loading || stations.length === 0
+                              }
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a station" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {stations.map((station) => (
+                                  <SelectItem key={station.id} value={station.id}>
+                                    {station.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    <Button
+                      type="submit"
+                      disabled={loading || !form.formState.isValid}
+                      className="w-full"
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a state" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {states.map((state) => (
-                          <SelectItem key={state.id} value={state.id}>
-                            {state.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {selectedState && (
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City / District</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={!selectedState || loading || cities.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a city/district" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              {selectedCity && (
-                <FormField
-                  control={form.control}
-                  name="station"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Monitoring Station</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={
-                          !selectedCity || loading || stations.length === 0
-                        }
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a station" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {stations.map((station) => (
-                            <SelectItem key={station.id} value={station.id}>
-                              {station.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading || !form.formState.isValid}
-                className="w-full"
-              >
-                {loading ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  'Get Dumb AQI'
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                      {loading ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : (
+                        'Get Dumb AQI'
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {loading && !data && (
@@ -334,17 +364,6 @@ export function AqiDashboard() {
             <p className="text-lg text-muted-foreground">
               Fetching brain-friendly data...
             </p>
-          </motion.div>
-        )}
-
-        {data && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
-          >
-            <AqiResultCard aqiData={data} />
-            <ImpactCard aqiData={data} />
           </motion.div>
         )}
       </AnimatePresence>

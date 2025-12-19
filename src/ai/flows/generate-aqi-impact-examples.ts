@@ -17,7 +17,11 @@ const GenerateAqiImpactExamplesInputSchema = z.object({
 export type GenerateAqiImpactExamplesInput = z.infer<typeof GenerateAqiImpactExamplesInputSchema>;
 
 const GenerateAqiImpactExamplesOutputSchema = z.object({
-  examples: z.array(z.string()).describe('Relatable examples of the AQI impact.'),
+  examples: z
+    .array(z.string())
+    .describe(
+      'A list of 3 very short, relatable examples of the AQI impact, like "Cigarettes smoked: 2".'
+    ),
 });
 export type GenerateAqiImpactExamplesOutput = z.infer<typeof GenerateAqiImpactExamplesOutputSchema>;
 
@@ -31,21 +35,20 @@ const prompt = ai.definePrompt({
   name: 'generateAqiImpactExamplesPrompt',
   input: {schema: GenerateAqiImpactExamplesInputSchema},
   output: {schema: GenerateAqiImpactExamplesOutputSchema},
-  prompt: `You are an expert in environmental health communication. You are tasked with generating relatable examples of the impact of the current Air Quality Index (AQI) for a given location.
+  prompt: `You are an expert in environmental health communication. Your task is to generate 3 short, relatable examples of the impact of an Air Quality Index (AQI) value.
 
   Location: {{location}}
   AQI: {{aqi}}
 
-  Generate 3 different examples that help an average person understand the health risks associated with the current AQI. These examples should be easy to understand and avoid technical jargon.
+  The examples must be very concise and formatted like "Category: Value".
+  For example: "Cigarettes smoked: 4".
 
-  Examples might include:
-  - Equivalent number of cigarettes smoked
-  - Time spent in a polluted city
-  - Comparison to other known risks
+  Generate 3 different examples. Examples could include:
+  - Equivalent number of cigarettes smoked.
+  - Time spent near heavy traffic.
+  - Reduced lung function percentage for a day.
 
-  Make sure the examples are contextual and appropriate. For instance, avoid making smoking sound appealing.
-
-  Output the examples as a numbered list.
+  Keep the examples impactful and easy to understand. Avoid technical jargon or long sentences.
   `,
 });
 
