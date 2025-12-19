@@ -75,7 +75,7 @@ export function AqiResultCard({
             style={{ color: aqiInfo.color }}
           />
           <div>
-            <h3 className="font-bold text-lg" style={{ color: aqiInfo.color }}>
+            <h3 className="font-bold text-lg text-card-foreground/90">
               Health Implications
             </h3>
             <p className="text-sm text-muted-foreground">
