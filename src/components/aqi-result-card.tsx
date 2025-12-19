@@ -72,7 +72,7 @@ export function AqiResultCard({
         >
           <AlertTriangle
             className="w-8 h-8 mr-4 shrink-0"
-            style={{ color: aqiInfo.color.slice(0, -2) }}
+            style={{ color: aqiInfo.color }}
           />
           <div>
             <h3 className="font-bold text-lg text-card-foreground/90">
