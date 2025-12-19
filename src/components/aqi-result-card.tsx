@@ -48,8 +48,8 @@ export function AqiResultCard({
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
           <div>
-            <CardDescription className="text-foreground/80">AQI in {aqiData.city}</CardDescription>
-            <CardTitle className="text-3xl font-headline flex items-center gap-2 text-foreground">
+            <CardDescription className="text-foreground">AQI in {aqiData.city}</CardDescription>
+            <CardTitle className="text-2xl sm:text-3xl font-headline flex items-center gap-2 text-foreground">
               <Wind className="w-6 h-6 text-muted-foreground" />
               <span>{aqiData.aqi}</span>
             </CardTitle>
@@ -67,11 +67,11 @@ export function AqiResultCard({
       </CardHeader>
       <CardContent className="space-y-6">
         <div
-          className="flex items-center p-4 rounded-lg"
+          className="flex items-start sm:items-center p-4 rounded-lg"
           style={{ backgroundColor: `${aqiInfo.color}20` }}
         >
           <AlertTriangle
-            className="w-8 h-8 mr-4"
+            className="w-8 h-8 mr-4 shrink-0"
             style={{ color: aqiInfo.color }}
           />
           <div>
@@ -86,7 +86,7 @@ export function AqiResultCard({
         </div>
 
         <div>
-          <h3 className="flex items-center font-headline text-2xl mb-4">
+          <h3 className="flex items-center font-headline text-xl sm:text-2xl mb-4">
             <BrainCircuit className="w-7 h-7 mr-2 text-primary" />
             What This Actually Means
           </h3>

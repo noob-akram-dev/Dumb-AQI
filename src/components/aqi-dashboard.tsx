@@ -199,10 +199,10 @@ export function AqiDashboard() {
             className="space-y-8"
           >
             <header className="text-center">
-              <h1 className="font-headline text-5xl font-bold text-primary">
+              <h1 className="font-headline text-4xl sm:text-5xl font-bold text-primary">
                 Dumb AQI
               </h1>
-              <p className="text-muted-foreground mt-2 text-lg">
+              <p className="text-muted-foreground mt-2 text-base sm:text-lg">
                 Air quality for India, explained in a way you can actually
                 understand.
               </p>
