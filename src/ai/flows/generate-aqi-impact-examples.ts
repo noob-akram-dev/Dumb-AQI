@@ -22,7 +22,7 @@ const GenerateAqiImpactExamplesOutputSchema = z.object({
   examples: z
     .array(z.string())
     .describe(
-      'A list of 3 very short, relatable examples of the AQI impact, like "Basically smoked: 2 cigarettes".',
+      'A list of 4 short, relatable examples of the AQI impact with India-specific comparisons and a practical health tip.',
     ),
 });
 export type GenerateAqiImpactExamplesOutput = z.infer<
@@ -39,21 +39,47 @@ const prompt = ai.definePrompt({
   name: "generateAqiImpactExamplesPrompt",
   input: { schema: GenerateAqiImpactExamplesInputSchema },
   output: { schema: GenerateAqiImpactExamplesOutputSchema },
-  prompt: `You are a witty and relatable environmental assistant. Your mission is to translate Air Quality Index (AQI) numbers into easy-to-understand comparisons that make the impact crystal clear.
+  prompt: `You are a witty, relatable Indian environmental assistant. Your mission is to translate Air Quality Index (AQI) numbers into easy-to-understand comparisons that Indians can instantly relate to.
 
   Location: {{location}}
   AQI: {{aqi}}
 
-  Generate 3 short, punchy, and relatable examples of the AQI's impact. These should be scientific yet easy to grasp.
+  Generate 4 short, punchy, and relatable examples of the AQI's impact. Make them feel REAL to everyday Indian life.
 
-  Use these three categories for your comparisons:
-  1.  "Cigarettes smoked (24hrs): X cigarettes" - Calculate based on research that shows AQI correlation to cigarette equivalents
-  2.  "Reduced life expectancy: X hours/days per year" - Based on WHO air pollution health impact data
-  3.  "Equivalent to: [relatable scenario]" - Like "Standing behind a running car for X minutes" or "Burning X candles in a closed room" or "Living near a busy highway"
+  Use these categories (pick 4 that fit best for this AQI level):
 
-  Be accurate with the values based on actual AQI health impacts. Use realistic numbers. For low AQI (0-50), use minimal impacts. For high AQI (300+), show severe impacts.
+  🚬 CIGARETTE EQUIVALENT:
+  - "Cigarettes breathed today: X cigarettes" - Based on research showing PM2.5 to cigarette equivalents
 
-  Keep it punchy and clear. The goal is to make the air quality impact instantly understandable.
+  ⏰ HEALTH IMPACT:
+  - "Life expectancy reduced: X hours/days per year of exposure" - Based on WHO data
+
+  🇮🇳 INDIAN LIFE COMPARISONS (use at least 2 of these):
+  - "Like standing behind an auto-rickshaw in traffic for X minutes"
+  - "Similar to being at a Diwali night with crackers for X hours"
+  - "Like cooking on a wood chulha in a closed kitchen"
+  - "Equivalent to being at a busy construction site for X hours"
+  - "Like walking through a crowded bus stand during peak hours"
+  - "Similar to standing near a garbage burning site"
+  - "Like being in Mumbai/Delhi traffic during rush hour"
+  - "Equivalent to sitting near an idling truck for X minutes"
+
+  💡 PRACTICAL TIP (always include one):
+  - For AQI 0-50: "Perfect for morning jog or outdoor yoga!"
+  - For AQI 51-100: "Sensitive people should limit outdoor exercise"
+  - For AQI 101-150: "Consider wearing a mask if going out for long"
+  - For AQI 151-200: "Kids and elderly should stay indoors"
+  - For AQI 201-300: "Everyone should wear N95 mask outdoors"
+  - For AQI 300+: "Avoid going outside. Keep windows closed!"
+
+  RULES:
+  - Be scientifically accurate but conversational
+  - Use realistic numbers based on actual AQI health research
+  - For low AQI (0-50), show positive impacts, be encouraging
+  - For moderate AQI (51-100), be cautiously optimistic
+  - For unhealthy AQI (150+), be direct about health risks
+  - Keep each example under 15 words
+  - Make it feel personal and impactful, not preachy
   `,
 });
 
