@@ -552,6 +552,93 @@ export function AqiDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* India vs World Comparison Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-4"
+            >
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-foreground mb-1">
+                  🇮🇳 India vs 🌍 World
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  See how Indian cities compare to first-world countries
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {/* Indian Cities */}
+                <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20">
+                  <p className="text-xs font-semibold text-red-600 mb-3 uppercase tracking-wide">
+                    🇮🇳 Typical Indian Cities (Winter)
+                  </p>
+                  <div className="space-y-3">
+                    {[
+                      { city: "Delhi", aqi: 350, emoji: "🏙️" },
+                      { city: "Mumbai", aqi: 180, emoji: "🌆" },
+                      { city: "Kolkata", aqi: 220, emoji: "🌃" },
+                      { city: "Lucknow", aqi: 280, emoji: "🏛️" },
+                    ].map((item) => (
+                      <div key={item.city} className="flex items-center gap-3">
+                        <span className="text-lg">{item.emoji}</span>
+                        <span className="w-20 text-sm font-medium text-foreground">{item.city}</span>
+                        <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-1000"
+                            style={{
+                              width: `${Math.min((item.aqi / 500) * 100, 100)}%`,
+                              backgroundColor: item.aqi > 200 ? '#7E0023' : item.aqi > 150 ? '#FF0000' : '#FF7E00'
+                            }}
+                          />
+                        </div>
+                        <span className="w-12 text-sm font-bold text-red-600 text-right">{item.aqi}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* First World Cities */}
+                <div className="p-4 rounded-2xl bg-green-500/5 border border-green-500/20">
+                  <p className="text-xs font-semibold text-green-600 mb-3 uppercase tracking-wide">
+                    🌍 First-World Cities (Same Season)
+                  </p>
+                  <div className="space-y-3">
+                    {[
+                      { city: "Zurich", aqi: 18, country: "🇨🇭", emoji: "🏔️" },
+                      { city: "Sydney", aqi: 25, country: "🇦🇺", emoji: "🌉" },
+                      { city: "Toronto", aqi: 32, country: "🇨🇦", emoji: "🍁" },
+                      { city: "Tokyo", aqi: 45, country: "🇯🇵", emoji: "🗼" },
+                    ].map((item) => (
+                      <div key={item.city} className="flex items-center gap-3">
+                        <span className="text-lg">{item.emoji}</span>
+                        <span className="w-20 text-sm font-medium text-foreground">{item.city}</span>
+                        <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-green-500 transition-all duration-1000"
+                            style={{ width: `${Math.min((item.aqi / 500) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <span className="w-12 text-sm font-bold text-green-600 text-right">{item.aqi}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Eye-opening fact */}
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                  <p className="text-sm text-center">
+                    <span className="font-bold text-amber-600">😱 Reality Check:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Delhi's AQI is often <span className="font-bold text-foreground">10-15x higher</span> than European cities.
+                      Living in Delhi for a year = smoking <span className="font-bold text-foreground">700+ cigarettes</span>.
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
