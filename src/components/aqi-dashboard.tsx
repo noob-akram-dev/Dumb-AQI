@@ -25,7 +25,16 @@ import { useToast } from "@/hooks/use-toast";
 import { getAqiData, getStates, getCities, getStations } from "@/app/actions";
 import type { AqiData } from "@/lib/types";
 import { AqiResultCard } from "@/components/aqi-result-card";
-import { LoaderCircle, MapPin, Wind, Sparkles } from "lucide-react";
+import {
+  LoaderCircle,
+  MapPin,
+  Wind,
+  Sparkles,
+  ChevronDown,
+  Building2,
+  Radio,
+  Navigation
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -244,6 +253,7 @@ export function AqiDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
           >
             <AqiResultCard
               aqiData={data}
@@ -259,204 +269,270 @@ export function AqiDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
             className="space-y-8"
           >
-            <header className="text-center space-y-4 py-8">
-              <div className="inline-block">
-                <h1 className="font-headline text-5xl sm:text-6xl font-extrabold text-primary">
-                  Dumb AQI
+            {/* Header */}
+            <header className="text-center space-y-6 py-8">
+              <motion.div
+                className="inline-block"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <div className="p-3 rounded-2xl bg-primary/10">
+                    <Wind className="w-8 h-8 text-primary" />
+                  </div>
+                </div>
+                <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">
+                  Dumb <span className="text-primary">AQI</span>
                 </h1>
-                <div className="h-1 w-full bg-primary rounded-full mt-2" />
-              </div>
-              <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto font-medium">
+              </motion.div>
+              <motion.p
+                className="text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto leading-relaxed"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 Air quality for India, explained in a way you can{" "}
-                <span className="text-primary font-bold">
+                <span className="text-foreground font-semibold">
                   actually understand
                 </span>
                 .
-              </p>
+              </motion.p>
             </header>
-            <Card className="shadow-2xl border-0 bg-card overflow-hidden">
-              <div className="h-1 bg-primary" />
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-2xl flex items-center gap-2">
-                  <Wind className="w-6 h-6 text-primary" />
-                  Check Air Quality
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Use your current location or select a location in India.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleUseMyLocation}
-                    disabled={loading}
-                    className="w-full h-14 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
-                  >
-                    <MapPin className="mr-2 h-5 w-5" /> Use My Current Location
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center bg-muted/50 rounded-lg py-2 px-3">
-                    💡 If location is unavailable, we'll use Delhi as a fallback
-                  </p>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t-2 border-dashed" />
-                  </div>
-                  <div className="relative flex justify-center text-sm uppercase font-semibold">
-                    <span className="bg-card px-4 py-1 text-muted-foreground rounded-full border-2 border-dashed">
-                      Or Select Manually
-                    </span>
-                  </div>
-                </div>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-primary" />
-                            State
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            disabled={loadingStates || loading}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-12 text-base">
-                                <SelectValue placeholder="Select a state" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {states.map((state) => (
-                                <SelectItem key={state.id} value={state.id}>
-                                  {state.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
-                    {selectedState && (
-                      <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-base font-semibold flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-accent" />
-                              City / District
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              disabled={
-                                !selectedState || loading || cities.length === 0
-                              }
-                            >
-                              <FormControl>
-                                <SelectTrigger className="h-12 text-base">
-                                  <SelectValue placeholder="Select a city/district" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {cities.map((city) => (
-                                  <SelectItem key={city.id} value={city.id}>
-                                    {city.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
+            {/* Main Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="premium-card overflow-hidden border-0">
+                <CardHeader className="space-y-2 pb-4">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10">
+                      <MapPin className="w-5 h-5 text-primary" />
+                    </div>
+                    Check Air Quality
+                  </CardTitle>
+                  <CardDescription className="text-base text-muted-foreground">
+                    Use your current location or select a monitoring station in India.
+                  </CardDescription>
+                </CardHeader>
 
-                    {selectedCity && (
-                      <FormField
-                        control={form.control}
-                        name="station"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-base font-semibold flex items-center gap-2">
-                              <Wind className="w-4 h-4 text-primary" />
-                              Monitoring Station
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              disabled={
-                                !selectedCity ||
-                                loading ||
-                                stations.length === 0
-                              }
-                            >
-                              <FormControl>
-                                <SelectTrigger className="h-12 text-base">
-                                  <SelectValue placeholder="Select a station" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {stations.map((station) => (
-                                  <SelectItem
-                                    key={station.id}
-                                    value={station.id}
-                                  >
-                                    {station.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
+                <CardContent className="space-y-6">
+                  {/* GPS Location Button */}
+                  <div className="space-y-3">
                     <Button
-                      type="submit"
-                      disabled={loading || !form.formState.isValid}
-                      className="w-full h-14 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+                      onClick={handleUseMyLocation}
+                      disabled={loading}
+                      className="w-full h-14 text-base font-semibold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
                     >
                       {loading ? (
-                        <LoaderCircle className="animate-spin h-6 w-6" />
+                        <LoaderCircle className="animate-spin h-5 w-5 mr-2" />
                       ) : (
-                        <>
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Get Dumb AQI
-                        </>
+                        <Navigation className="mr-2 h-5 w-5" />
                       )}
+                      Use My Current Location
                     </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
+                    <p className="text-xs text-muted-foreground text-center py-2 px-4 bg-muted/50 rounded-xl">
+                      📍 We'll find the nearest monitoring station to your location
+                    </p>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="relative py-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t-2 border-dashed border-border" />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-card px-4 py-1.5 text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                        Or Select Manually
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Form */}
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-5"
+                    >
+                      {/* State Selector */}
+                      <FormField
+                        control={form.control}
+                        name="state"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                              <MapPin className="w-4 h-4 text-primary" />
+                              State
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              disabled={loadingStates || loading}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
+                                  <SelectValue placeholder={loadingStates ? "Loading states..." : "Select a state"} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                                {states.map((state) => (
+                                  <SelectItem
+                                    key={state.id}
+                                    value={state.id}
+                                    className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                  >
+                                    {state.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* City Selector */}
+                      {selectedState && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                                  <Building2 className="w-4 h-4 text-accent" />
+                                  City / District
+                                </FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  disabled={
+                                    !selectedState || loading || cities.length === 0
+                                  }
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-accent/50 focus:border-accent transition-colors select-premium bg-background">
+                                      <SelectValue placeholder={cities.length === 0 && selectedState ? "Loading cities..." : "Select a city/district"} />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                                    {cities.map((city) => (
+                                      <SelectItem
+                                        key={city.id}
+                                        value={city.id}
+                                        className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                      >
+                                        {city.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </motion.div>
+                      )}
+
+                      {/* Station Selector */}
+                      {selectedCity && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <FormField
+                            control={form.control}
+                            name="station"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                                  <Radio className="w-4 h-4 text-primary" />
+                                  Monitoring Station
+                                </FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  disabled={
+                                    !selectedCity ||
+                                    loading ||
+                                    stations.length === 0
+                                  }
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
+                                      <SelectValue placeholder={stations.length === 0 && selectedCity ? "Loading stations..." : "Select a station"} />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                                    {stations.map((station) => (
+                                      <SelectItem
+                                        key={station.id}
+                                        value={station.id}
+                                        className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                      >
+                                        {station.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </motion.div>
+                      )}
+
+                      {/* Submit Button */}
+                      <Button
+                        type="submit"
+                        disabled={loading || !form.formState.isValid}
+                        className="w-full h-14 text-lg font-bold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? (
+                          <LoaderCircle className="animate-spin h-6 w-6" />
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            Get Dumb AQI
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Loading State */}
       <AnimatePresence>
         {loading && !data && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="flex flex-col justify-center items-center text-center py-12 space-y-6"
+            className="flex flex-col justify-center items-center text-center py-16 space-y-6"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-              <LoaderCircle className="relative w-16 h-16 animate-spin text-primary" />
+              <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl animate-pulse" />
+              <div className="relative p-6 rounded-full bg-primary/10 animate-pulse-ring">
+                <LoaderCircle className="w-12 h-12 animate-spin text-primary" />
+              </div>
             </div>
             <div className="space-y-2">
               <p className="text-xl font-semibold text-foreground">
@@ -470,8 +546,8 @@ export function AqiDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Footer with attribution */}
-      <footer className="mt-12 text-center space-y-2 pb-4">
+      {/* Footer */}
+      <footer className="mt-16 text-center space-y-3 pb-8">
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Wind className="w-4 h-4" />
           <p>
@@ -480,13 +556,13 @@ export function AqiDashboard() {
               href="https://airquality.cpcb.gov.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-primary transition-colors"
+              className="underline hover:text-primary transition-colors font-medium"
             >
               Central Pollution Control Board (CPCB)
             </a>
           </p>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground/70">
           Made with ❤️ to help you understand air quality better
         </p>
       </footer>

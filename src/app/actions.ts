@@ -63,6 +63,45 @@ async function fetchAndParseAqiData() {
   }
 }
 
+// Reverse geocoding using free Nominatim API
+async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
+      {
+        headers: {
+          'User-Agent': 'DumbAQI/1.0',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Reverse geocoding failed:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const address = data.address;
+
+    // Build a readable location name
+    const parts: string[] = [];
+    if (address.suburb || address.neighbourhood || address.residential) {
+      parts.push(address.suburb || address.neighbourhood || address.residential);
+    }
+    if (address.city || address.town || address.village || address.municipality) {
+      parts.push(address.city || address.town || address.village || address.municipality);
+    }
+    if (address.state) {
+      parts.push(address.state);
+    }
+
+    return parts.length > 0 ? parts.join(", ") : null;
+  } catch (error) {
+    console.error("Error in reverseGeocode:", error);
+    return null;
+  }
+}
+
 function getAllStations() {
   const jsonData = cachedData;
   const allStations: any[] = [];
@@ -106,9 +145,9 @@ const getDistance = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in km
 };
@@ -228,6 +267,8 @@ export async function getAqiData(
     await fetchAndParseAqiData(); // Ensure data is fetched and cached
 
     let targetStation: any;
+    let distanceKm: number | undefined;
+    let userLocation: string | undefined;
     const allStations = getAllStations();
 
     console.log("Total stations available:", allStations.length);
@@ -242,6 +283,11 @@ export async function getAqiData(
         location.lat,
         location.lon,
       );
+
+      // Get user's actual location via reverse geocoding
+      userLocation = await reverseGeocode(location.lat, location.lon) || undefined;
+      console.log("User location from reverse geocoding:", userLocation);
+
       let closestStation: any = null;
       let minDistance = Infinity;
       let validStationsCount = 0;
@@ -268,6 +314,7 @@ export async function getAqiData(
           distance: minDistance.toFixed(2) + " km",
           aqi: closestStation.Air_Quality_Index?.Value,
         });
+        distanceKm = Math.round(minDistance * 10) / 10; // Round to 1 decimal
       }
 
       targetStation = closestStation;
@@ -294,6 +341,7 @@ export async function getAqiData(
 
     const aqi = parseInt(targetStation.Air_Quality_Index?.Value, 10);
     const city = targetStation.city.replace(/_/g, " ");
+    const stationName = targetStation.id;
 
     console.log("Target station AQI:", aqi, "City:", city);
 
@@ -305,15 +353,23 @@ export async function getAqiData(
     console.log("Generating AI examples for AQI:", aqi, "Location:", city);
     const impactResult = await generateAqiImpactExamples({
       aqi,
-      location: city,
+      location: userLocation || city,
     });
 
     console.log("AI examples generated:", impactResult.examples);
 
     return {
       aqi,
-      city: `${targetStation.id}, ${city}`,
+      city: city,
+      userLocation,
+      stationName,
+      distanceKm,
       examples: impactResult.examples,
+      lastUpdated: new Date().toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }),
     };
   } catch (error) {
     console.error("Error in getAqiData:", error);
