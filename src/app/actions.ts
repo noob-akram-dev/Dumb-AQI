@@ -288,36 +288,81 @@ export async function getAqiData(
       userLocation = await reverseGeocode(location.lat, location.lon) || undefined;
       console.log("User location from reverse geocoding:", userLocation);
 
-      let closestStation: any = null;
-      let minDistance = Infinity;
-      let validStationsCount = 0;
+      // Extract city name from user location for smart matching
+      let userCityName: string | null = null;
+      if (userLocation) {
+        // Try to extract the city/town name (usually the first or second part before the state)
+        const parts = userLocation.split(',').map(p => p.trim().toLowerCase());
+        userCityName = parts[0] || null; // First part is usually the city/area
+        console.log("Extracted user city for matching:", userCityName);
+      }
 
-      for (const station of allStations) {
-        const lat = parseFloat(station.latitude);
-        const lon = parseFloat(station.longitude);
-        const aqiVal = parseInt(station.Air_Quality_Index?.Value, 10);
-        if (!isNaN(lat) && !isNaN(lon) && !isNaN(aqiVal)) {
-          validStationsCount++;
-          const distance = getDistance(location.lat, location.lon, lat, lon);
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestStation = station;
+      // PRIORITY 1: Try to find a station in the user's city (exact or partial match)
+      let cityMatchedStation: any = null;
+      if (userCityName) {
+        for (const station of allStations) {
+          const stationCity = station.city.toLowerCase().replace(/_/g, ' ');
+          const aqiVal = parseInt(station.Air_Quality_Index?.Value, 10);
+
+          if (!isNaN(aqiVal)) {
+            // Check if station city matches user city (partial match)
+            if (stationCity.includes(userCityName) || userCityName.includes(stationCity)) {
+              const lat = parseFloat(station.latitude);
+              const lon = parseFloat(station.longitude);
+              if (!isNaN(lat) && !isNaN(lon)) {
+                const distance = getDistance(location.lat, location.lon, lat, lon);
+                // Only accept if within 50km (same city should be reasonably close)
+                if (distance < 50) {
+                  cityMatchedStation = station;
+                  distanceKm = Math.round(distance * 10) / 10;
+                  console.log("City name matched station found:", {
+                    id: station.id,
+                    city: station.city,
+                    distance: distance.toFixed(2) + " km",
+                  });
+                  break;
+                }
+              }
+            }
           }
         }
       }
 
-      console.log(`Found ${validStationsCount} valid stations with AQI data`);
-      if (closestStation) {
-        console.log("Closest station:", {
-          id: closestStation.id,
-          city: closestStation.city,
-          distance: minDistance.toFixed(2) + " km",
-          aqi: closestStation.Air_Quality_Index?.Value,
-        });
-        distanceKm = Math.round(minDistance * 10) / 10; // Round to 1 decimal
-      }
+      // PRIORITY 2: If no city match, fall back to closest station by distance
+      if (cityMatchedStation) {
+        targetStation = cityMatchedStation;
+      } else {
+        let closestStation: any = null;
+        let minDistance = Infinity;
+        let validStationsCount = 0;
 
-      targetStation = closestStation;
+        for (const station of allStations) {
+          const lat = parseFloat(station.latitude);
+          const lon = parseFloat(station.longitude);
+          const aqiVal = parseInt(station.Air_Quality_Index?.Value, 10);
+          if (!isNaN(lat) && !isNaN(lon) && !isNaN(aqiVal)) {
+            validStationsCount++;
+            const distance = getDistance(location.lat, location.lon, lat, lon);
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestStation = station;
+            }
+          }
+        }
+
+        console.log(`Found ${validStationsCount} valid stations with AQI data`);
+        if (closestStation) {
+          console.log("Closest station by distance:", {
+            id: closestStation.id,
+            city: closestStation.city,
+            distance: minDistance.toFixed(2) + " km",
+            aqi: closestStation.Air_Quality_Index?.Value,
+          });
+          distanceKm = Math.round(minDistance * 10) / 10;
+        }
+
+        targetStation = closestStation;
+      }
     } else if (location.station && location.city && location.state) {
       targetStation = findStation(
         location.state,
