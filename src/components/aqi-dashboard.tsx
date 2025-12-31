@@ -160,80 +160,117 @@ export function AqiDashboard() {
     }
   };
 
-  const handleUseMyLocation = () => {
+  // IP-based geolocation fallback
+  const getLocationByIP = async (): Promise<{ lat: number, lon: number, city?: string } | null> => {
+    try {
+      // Try multiple IP geolocation services for reliability
+      const services = [
+        'https://ipapi.co/json/',
+        'https://ip-api.com/json/?fields=lat,lon,city',
+      ];
+
+      for (const url of services) {
+        try {
+          const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.latitude && data.longitude) {
+              return { lat: data.latitude, lon: data.longitude, city: data.city };
+            }
+            if (data.lat && data.lon) {
+              return { lat: data.lat, lon: data.lon, city: data.city };
+            }
+          }
+        } catch (e) {
+          console.log(`IP geolocation service ${url} failed, trying next...`);
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error("All IP geolocation services failed:", error);
+      return null;
+    }
+  };
+
+  const handleUseMyLocation = async () => {
     if (!navigator.geolocation) {
       toast({
         variant: "destructive",
         title: "Geolocation not supported",
-        description: "Your browser doesn't support geolocation.",
+        description: "Your browser doesn't support geolocation. Please select a location manually.",
       });
       return;
     }
+
     form.reset();
     setCities([]);
     setStations([]);
     setLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("Location obtained:", {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-        handleFetchAqi({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        let errorMessage = "Could not get your location.";
-        let shouldUseFallback = false;
+    // Try GPS first
+    const tryGPS = (): Promise<GeolocationPosition | null> => {
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => resolve(position),
+          () => resolve(null),
+          {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 60000, // Accept cached position up to 1 minute old
+          }
+        );
+      });
+    };
 
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage =
-              "Location permission denied. Please allow location access in your browser settings or select a location manually.";
-            setLoading(false);
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage =
-              "Location unavailable. Using Delhi as fallback location...";
-            shouldUseFallback = true;
-            break;
-          case error.TIMEOUT:
-            errorMessage =
-              "Location request timed out. Using Delhi as fallback location...";
-            shouldUseFallback = true;
-            break;
-          default:
-            errorMessage = `Could not get your location: ${error.message}. Using Delhi as fallback...`;
-            shouldUseFallback = true;
-        }
+    // Attempt 1: Try GPS with high accuracy
+    let position = await tryGPS();
 
-        toast({
-          variant: shouldUseFallback ? "default" : "destructive",
-          title: shouldUseFallback
-            ? "Using Fallback Location"
-            : "Location Error",
-          description: errorMessage,
-        });
+    if (position) {
+      console.log("GPS location obtained:", {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      });
+      handleFetchAqi({
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      });
+      return;
+    }
 
-        // Use Delhi (28.6139, 77.2090) as fallback for position unavailable
-        if (shouldUseFallback) {
-          console.log("Using fallback location: Delhi (28.6139, 77.2090)");
-          handleFetchAqi({
-            lat: 28.6139,
-            lon: 77.209,
-          });
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
-    );
+    // Attempt 2: Try IP-based geolocation
+    console.log("GPS failed, trying IP-based geolocation...");
+    toast({
+      title: "Detecting location...",
+      description: "GPS unavailable, using network location...",
+    });
+
+    const ipLocation = await getLocationByIP();
+
+    if (ipLocation) {
+      console.log("IP-based location obtained:", ipLocation);
+      toast({
+        title: "Location detected via network",
+        description: ipLocation.city ? `Detected: ${ipLocation.city}` : "Location detected successfully",
+      });
+      handleFetchAqi({
+        lat: ipLocation.lat,
+        lon: ipLocation.lon,
+      });
+      return;
+    }
+
+    // Attempt 3: Use Delhi as final fallback
+    console.log("All location methods failed, using Delhi fallback");
+    toast({
+      variant: "default",
+      title: "Using Delhi as fallback",
+      description: "Could not detect your location. Showing Delhi AQI. Select manually for your city.",
+    });
+
+    handleFetchAqi({
+      lat: 28.6139,
+      lon: 77.209,
+    });
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
