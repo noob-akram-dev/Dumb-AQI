@@ -466,7 +466,7 @@ export function AqiDashboard() {
                         <span className="ml-2 text-sm text-muted-foreground">Detecting nearby stations...</span>
                       </div>
                     ) : (
-                      <div className="grid gap-2">
+                      <div className="grid gap-2 w-full">
                         {nearbyStations.map((station, index) => (
                           <motion.button
                             key={station.id}
@@ -475,7 +475,7 @@ export function AqiDashboard() {
                             transition={{ delay: index * 0.1 }}
                             onClick={() => userCoords && handleFetchAqi({ lat: userCoords.lat, lon: userCoords.lon })}
                             disabled={loading}
-                            className="flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50"
+                            className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50 overflow-hidden"
                           >
                             <div
                               className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
