@@ -132,7 +132,6 @@ function getAllStations() {
   return allStations;
 }
 
-// Haversine formula to calculate distance between two lat/lon points
 const getDistance = (
   lat1: number,
   lon1: number,
@@ -151,6 +150,56 @@ const getDistance = (
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in km
 };
+
+// Get 3 nearest stations to user's location
+export type NearbyStation = {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  aqi: number;
+  distanceKm: number;
+};
+
+export async function getNearestStations(
+  lat: number,
+  lon: number,
+): Promise<NearbyStation[]> {
+  try {
+    await fetchAndParseAqiData();
+    const allStations = getAllStations();
+
+    const stationsWithDistance = allStations
+      .map((station) => {
+        const stationLat = parseFloat(station.latitude);
+        const stationLon = parseFloat(station.longitude);
+        const aqiVal = parseInt(station.Air_Quality_Index?.Value, 10);
+
+        if (isNaN(stationLat) || isNaN(stationLon) || isNaN(aqiVal)) {
+          return null;
+        }
+
+        const distance = getDistance(lat, lon, stationLat, stationLon);
+
+        return {
+          id: station.id,
+          name: station.id.replace(/_/g, " "),
+          city: station.city.replace(/_/g, " "),
+          state: station.state.replace(/_/g, " "),
+          aqi: aqiVal,
+          distanceKm: Math.round(distance * 10) / 10,
+        };
+      })
+      .filter((s): s is NearbyStation => s !== null)
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 3);
+
+    return stationsWithDistance;
+  } catch (error) {
+    console.error("Error getting nearest stations:", error);
+    return [];
+  }
+}
 
 export async function getStates(): Promise<{ id: string; name: string }[]> {
   try {

@@ -215,6 +215,41 @@ export function AqiResultCard({
             </p>
           )}
 
+          {/* 24-Hour Breathing Impact */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white"
+          >
+            <p className="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider text-center">
+              ⏱️ Effect of 24 Hours Breathing This Air
+            </p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-2xl font-extrabold text-red-400">
+                  {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1">Cigarettes Smoked</p>
+              </div>
+              <div>
+                <p className="text-2xl font-extrabold text-amber-400">
+                  {Math.max(0, Math.round(aqiData.aqi * 0.08))}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1">Minutes Lost*</p>
+              </div>
+              <div>
+                <p className="text-2xl font-extrabold text-purple-400">
+                  {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1">Lung Damage Risk</p>
+              </div>
+            </div>
+            <p className="text-[9px] text-slate-500 text-center mt-3">
+              *Life expectancy minutes lost per day based on PM2.5 exposure studies
+            </p>
+          </motion.div>
+
           {/* Health Advisory */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}

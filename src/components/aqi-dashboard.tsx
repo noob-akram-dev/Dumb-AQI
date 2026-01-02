@@ -63,6 +63,12 @@ export function AqiDashboard() {
   const [cities, setCities] = useState<LocationSelectItem[]>([]);
   const [stations, setStations] = useState<LocationSelectItem[]>([]);
 
+  // Nearby stations state
+  const [nearbyStations, setNearbyStations] = useState<any[]>([]);
+  const [loadingNearby, setLoadingNearby] = useState(false);
+  const [userCoords, setUserCoords] = useState<{ lat: number, lon: number } | null>(null);
+  const [locationRequested, setLocationRequested] = useState(false);
+
   const [loadingStates, setLoadingStates] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,6 +82,38 @@ export function AqiDashboard() {
 
   const selectedState = form.watch("state");
   const selectedCity = form.watch("city");
+
+  // Auto-request location on page load
+  useEffect(() => {
+    if (typeof window !== "undefined" && navigator.geolocation && !locationRequested) {
+      setLocationRequested(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          };
+          setUserCoords(coords);
+
+          // Fetch nearby stations
+          setLoadingNearby(true);
+          try {
+            const { getNearestStations } = await import("@/app/actions");
+            const nearby = await getNearestStations(coords.lat, coords.lon);
+            setNearbyStations(nearby);
+          } catch (e) {
+            console.error("Failed to get nearby stations:", e);
+          }
+          setLoadingNearby(false);
+        },
+        () => {
+          // Location denied or unavailable - that's fine, will show manual selection
+          console.log("Location permission denied or unavailable");
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+      );
+    }
+  }, [locationRequested]);
 
   useEffect(() => {
     const fetchStates = async () => {
@@ -360,6 +398,63 @@ export function AqiDashboard() {
                 </CardHeader>
 
                 <CardContent className="space-y-6">
+                  {/* Nearby Stations Quick Pick */}
+                  {(nearbyStations.length > 0 || loadingNearby) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-primary" />
+                        <p className="text-sm font-semibold text-foreground">Stations Near You</p>
+                      </div>
+
+                      {loadingNearby ? (
+                        <div className="flex items-center justify-center py-6">
+                          <LoaderCircle className="animate-spin h-5 w-5 text-primary" />
+                          <span className="ml-2 text-sm text-muted-foreground">Detecting nearby stations...</span>
+                        </div>
+                      ) : (
+                        <div className="grid gap-2">
+                          {nearbyStations.map((station, index) => (
+                            <motion.button
+                              key={station.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              onClick={() => userCoords && handleFetchAqi({ lat: userCoords.lat, lon: userCoords.lon })}
+                              disabled={loading}
+                              className="flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50"
+                            >
+                              <div
+                                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                                style={{
+                                  backgroundColor: station.aqi > 200 ? '#7E0023' :
+                                    station.aqi > 150 ? '#FF0000' :
+                                      station.aqi > 100 ? '#FF7E00' :
+                                        station.aqi > 50 ? '#FFFF00' : '#00E400',
+                                  color: station.aqi > 100 ? '#fff' : '#000'
+                                }}
+                              >
+                                {station.aqi}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                  {station.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{station.city}</p>
+                              </div>
+                              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                                {station.distanceKm} km
+                              </span>
+                            </motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+
                   {/* GPS Location Button */}
                   <div className="space-y-3">
                     <Button
@@ -372,11 +467,13 @@ export function AqiDashboard() {
                       ) : (
                         <Navigation className="mr-2 h-5 w-5" />
                       )}
-                      Use My Current Location
+                      {nearbyStations.length > 0 ? "Check My Exact Location" : "Use My Current Location"}
                     </Button>
-                    <p className="text-xs text-muted-foreground text-center py-2 px-4 bg-muted/50 rounded-xl">
-                      📍 We'll find the nearest monitoring station to your location
-                    </p>
+                    {nearbyStations.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-2 px-4 bg-muted/50 rounded-xl">
+                        📍 We'll find the nearest monitoring station to your location
+                      </p>
+                    )}
                   </div>
 
                   {/* Divider */}
