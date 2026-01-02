@@ -397,7 +397,7 @@ export function AqiDashboard() {
                   transition={{ delay: 0.1 }}
                 >
                   <div className="flex items-center justify-center mb-2">
-                    <img src="/icons/icon-512x512.png" alt="Dumb AQI" className="w-20 h-20 sm:w-24 sm:h-24 shadow-2xl rounded-2xl animate-float" />
+                    <img src="/icons/icon-512x512.png" alt="Dumb AQI" className="w-20 h-20 sm:w-24 sm:h-24 shadow-2xl rounded-2xl" />
                   </div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-amber-900">
                     Dumb <span className="text-orange-600">AQI</span>
