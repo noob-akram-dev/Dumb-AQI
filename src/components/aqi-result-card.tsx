@@ -215,46 +215,11 @@ export function AqiResultCard({
             </p>
           )}
 
-          {/* 24-Hour Breathing Impact */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white"
-          >
-            <p className="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider text-center">
-              ⏱️ Effect of 24 Hours Breathing This Air
-            </p>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-2xl font-extrabold text-red-400">
-                  {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">Cigarettes Smoked</p>
-              </div>
-              <div>
-                <p className="text-2xl font-extrabold text-amber-400">
-                  {Math.max(0, Math.round(aqiData.aqi * 0.08))}
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">Minutes Lost*</p>
-              </div>
-              <div>
-                <p className="text-2xl font-extrabold text-purple-400">
-                  {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">Lung Damage Risk</p>
-              </div>
-            </div>
-            <p className="text-[9px] text-slate-500 text-center mt-3">
-              *Life expectancy minutes lost per day based on PM2.5 exposure studies
-            </p>
-          </motion.div>
-
           {/* Health Advisory */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.35 }}
             className="p-5 rounded-2xl"
             style={{
               backgroundColor: `${aqiInfo.color}08`,
@@ -291,37 +256,75 @@ export function AqiResultCard({
             </div>
           </motion.div>
 
-          {/* Impact Examples */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <Sparkles className="w-5 h-5 text-white" />
+          {/* Health Impact & Examples Combined Container */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-2xl border-2 border-border overflow-hidden"
+          >
+            {/* 24-Hour Breathing Impact - Header */}
+            <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 p-5 text-white">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Clock className="w-4 h-4 text-slate-400" />
+                <p className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
+                  24-Hour Exposure Impact
+                </p>
               </div>
-              <div>
-                <h3 className="text-base font-bold">What This Means</h3>
-                <p className="text-xs text-muted-foreground">AI-generated insights for you</p>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-3xl font-black text-red-400">
+                    {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1 font-medium">🚬 Cigarettes</p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-3xl font-black text-amber-400">
+                    {Math.max(0, Math.round(aqiData.aqi * 0.08))}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1 font-medium">⏱️ Min Lost</p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-xl font-black text-purple-400 mt-1">
+                    {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1 font-medium">🫁 Risk Level</p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              {aqiData.examples.map((example, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-muted/40 hover:bg-muted/60 border border-transparent hover:border-border transition-all duration-200"
-                >
-                  <div className="p-2.5 rounded-xl bg-background shadow-sm border border-border/50">
-                    {getIconForExample(example)}
-                  </div>
-                  <p className="text-sm leading-relaxed text-foreground flex-1 pt-1">
-                    {example}
-                  </p>
-                </motion.div>
-              ))}
+            {/* Research-Based Examples */}
+            <div className="p-5 bg-card">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">What This Means For You</h3>
+                  <p className="text-[10px] text-muted-foreground">Based on WHO & EPA research data</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {aqiData.examples.map((example, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.08 }}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200"
+                  >
+                    <div className="p-2 rounded-lg bg-background shadow-sm border border-border/50">
+                      {getIconForExample(example)}
+                    </div>
+                    <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
+                      {example}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
+          </motion.div>
         </CardContent>
 
         <CardFooter className="pt-4 pb-6 px-6">

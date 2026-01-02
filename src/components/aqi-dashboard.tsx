@@ -657,13 +657,10 @@ export function AqiDashboard() {
               transition={{ delay: 0.5 }}
             >
               <Card className="premium-card overflow-hidden border-0">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-orange-500 via-white to-green-600 h-1" />
                 <CardHeader className="text-center pb-2">
                   <CardTitle className="text-xl font-bold flex items-center justify-center gap-2">
-                    <span className="text-2xl">🇮🇳</span>
                     India vs World
-                    <span className="text-2xl">🌍</span>
+                    <span className="text-xl">🌍</span>
                   </CardTitle>
                   <CardDescription>
                     Typical AQI comparison during winter months
@@ -686,10 +683,10 @@ export function AqiDashboard() {
                       </div>
                       <div className="space-y-3">
                         {[
-                          { city: "Delhi", aqi: 350, status: "Hazardous" },
-                          { city: "Lucknow", aqi: 280, status: "Very Unhealthy" },
-                          { city: "Kolkata", aqi: 220, status: "Very Unhealthy" },
-                          { city: "Mumbai", aqi: 180, status: "Unhealthy" },
+                          { city: "Delhi", aqi: 350, status: "Hazardous", color: "#7F1D1D" },
+                          { city: "Lucknow", aqi: 280, status: "Very Unhealthy", color: "#991B1B" },
+                          { city: "Kolkata", aqi: 220, status: "Very Unhealthy", color: "#B91C1C" },
+                          { city: "Mumbai", aqi: 180, status: "Unhealthy", color: "#DC2626" },
                         ].map((item, index) => (
                           <motion.div
                             key={item.city}
@@ -702,20 +699,21 @@ export function AqiDashboard() {
                               <span className="text-sm font-semibold text-foreground">{item.city}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{item.status}</span>
-                                <span className="text-sm font-bold text-red-600 tabular-nums">{item.aqi}</span>
+                                <span
+                                  className="text-sm font-bold tabular-nums"
+                                  style={{ color: item.color }}
+                                >
+                                  {item.aqi}
+                                </span>
                               </div>
                             </div>
-                            <div className="h-2.5 bg-red-100 rounded-full overflow-hidden">
+                            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                               <motion.div
                                 className="h-full rounded-full"
                                 initial={{ width: 0 }}
                                 animate={{ width: `${Math.min((item.aqi / 500) * 100, 100)}%` }}
                                 transition={{ duration: 1, delay: 0.8 + index * 0.1 }}
-                                style={{
-                                  background: item.aqi > 300 ? 'linear-gradient(90deg, #7E0023, #4a0014)' :
-                                    item.aqi > 200 ? 'linear-gradient(90deg, #8F3F97, #7E0023)' :
-                                      'linear-gradient(90deg, #FF0000, #8F3F97)'
-                                }}
+                                style={{ backgroundColor: item.color }}
                               />
                             </div>
                           </motion.div>
@@ -736,10 +734,10 @@ export function AqiDashboard() {
                       </div>
                       <div className="space-y-3">
                         {[
-                          { city: "Zurich", flag: "🇨🇭", aqi: 18, status: "Good" },
-                          { city: "Sydney", flag: "🇦🇺", aqi: 25, status: "Good" },
-                          { city: "Toronto", flag: "🇨🇦", aqi: 32, status: "Good" },
-                          { city: "Tokyo", flag: "🇯🇵", aqi: 45, status: "Good" },
+                          { city: "Zurich", aqi: 18, status: "Good" },
+                          { city: "Sydney", aqi: 25, status: "Good" },
+                          { city: "Toronto", aqi: 32, status: "Good" },
+                          { city: "Tokyo", aqi: 45, status: "Good" },
                         ].map((item, index) => (
                           <motion.div
                             key={item.city}
@@ -749,10 +747,7 @@ export function AqiDashboard() {
                             transition={{ delay: 0.6 + index * 0.1 }}
                           >
                             <div className="flex items-center justify-between mb-1.5">
-                              <div className="flex items-center gap-2">
-                                <span className="text-base">{item.flag}</span>
-                                <span className="text-sm font-semibold text-foreground">{item.city}</span>
-                              </div>
+                              <span className="text-sm font-semibold text-foreground">{item.city}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{item.status}</span>
                                 <span className="text-sm font-bold text-green-600 tabular-nums">{item.aqi}</span>
@@ -760,7 +755,7 @@ export function AqiDashboard() {
                             </div>
                             <div className="h-2.5 bg-green-100 rounded-full overflow-hidden">
                               <motion.div
-                                className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600"
+                                className="h-full rounded-full bg-green-500"
                                 initial={{ width: 0 }}
                                 animate={{ width: `${Math.min((item.aqi / 500) * 100, 100)}%` }}
                                 transition={{ duration: 1, delay: 0.8 + index * 0.1 }}
@@ -772,24 +767,24 @@ export function AqiDashboard() {
                     </div>
                   </div>
 
-                  {/* Stats Cards */}
+                  {/* Stats Cards - Professional Design */}
                   <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="text-center p-3 rounded-xl bg-red-50 border border-red-100">
-                      <p className="text-2xl font-extrabold text-red-600">19x</p>
-                      <p className="text-xs text-muted-foreground mt-1">Delhi vs Zurich</p>
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                      <p className="text-3xl font-black text-foreground">19x</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-medium">Delhi vs Zurich</p>
                     </div>
-                    <div className="text-center p-3 rounded-xl bg-amber-50 border border-amber-100">
-                      <p className="text-2xl font-extrabold text-amber-600">700+</p>
-                      <p className="text-xs text-muted-foreground mt-1">Cigarettes/Year*</p>
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                      <p className="text-3xl font-black text-foreground">700+</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-medium">Cigarettes/Year*</p>
                     </div>
-                    <div className="text-center p-3 rounded-xl bg-purple-50 border border-purple-100">
-                      <p className="text-2xl font-extrabold text-purple-600">4.5</p>
-                      <p className="text-xs text-muted-foreground mt-1">Years Lost*</p>
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                      <p className="text-3xl font-black text-foreground">4.5</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-medium">Years Lost*</p>
                     </div>
                   </div>
 
                   {/* Footnote */}
-                  <p className="text-[10px] text-muted-foreground text-center">
+                  <p className="text-[10px] text-muted-foreground text-center pt-1">
                     * Based on WHO & AQLI studies on PM2.5 exposure in Delhi
                   </p>
                 </CardContent>
