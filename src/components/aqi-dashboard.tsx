@@ -33,7 +33,9 @@ import {
   ChevronDown,
   Building2,
   Radio,
-  Navigation
+  Navigation,
+  Download,
+  Smartphone
 } from "lucide-react";
 import {
   Select,
@@ -68,6 +70,10 @@ export function AqiDashboard() {
   const [loadingNearby, setLoadingNearby] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number, lon: number } | null>(null);
   const [locationRequested, setLocationRequested] = useState(false);
+
+  // PWA Install prompt
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   const [loadingStates, setLoadingStates] = useState(true);
 
@@ -114,6 +120,34 @@ export function AqiDashboard() {
       );
     }
   }, [locationRequested]);
+
+  // Capture PWA install prompt
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallButton(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallButton(false);
+      toast({ title: "App installed!", description: "Dumb AQI has been added to your home screen." });
+    }
+    setInstallPrompt(null);
+  };
 
   useEffect(() => {
     const fetchStates = async () => {
@@ -345,27 +379,27 @@ export function AqiDashboard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="space-y-8"
+            className="space-y-6 sm:space-y-8"
           >
             {/* Header */}
-            <header className="text-center space-y-6 py-8">
+            <header className="text-center space-y-4 sm:space-y-6 py-6 sm:py-8 px-4">
               <motion.div
                 className="inline-block"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <div className="p-3 rounded-2xl bg-primary/10">
-                    <Wind className="w-8 h-8 text-primary" />
+                <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2">
+                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/10">
+                    <Wind className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                   </div>
                 </div>
-                <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-foreground">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
                   Dumb <span className="text-primary">AQI</span>
                 </h1>
               </motion.div>
               <motion.p
-                className="text-muted-foreground text-lg sm:text-xl max-w-lg mx-auto leading-relaxed"
+                className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-lg mx-auto leading-relaxed px-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -376,6 +410,24 @@ export function AqiDashboard() {
                 </span>
                 .
               </motion.p>
+
+              {/* Install App Button */}
+              {showInstallButton && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button
+                    onClick={handleInstallClick}
+                    variant="outline"
+                    className="rounded-full px-6 py-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Install App
+                  </Button>
+                </motion.div>
+              )}
             </header>
 
             {/* Main Card */}
