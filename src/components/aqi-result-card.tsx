@@ -264,31 +264,31 @@ export function AqiResultCard({
             className="rounded-2xl border-2 border-border overflow-hidden"
           >
             {/* 24-Hour Breathing Impact - Header */}
-            <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 p-5 text-white">
+            <div className="bg-slate-900 p-5 text-white">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-slate-400" />
                 <p className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
                   24-Hour Exposure Impact
                 </p>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-white/5 rounded-xl p-3">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3">
                   <p className="text-3xl font-black text-red-400">
                     {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1 font-medium">🚬 Cigarettes</p>
+                  <p className="text-[11px] text-red-300 mt-1 font-medium">🚬 Cigarettes</p>
                 </div>
-                <div className="bg-white/5 rounded-xl p-3">
+                <div className="bg-amber-500/20 border border-amber-500/30 rounded-xl p-3">
                   <p className="text-3xl font-black text-amber-400">
                     {Math.max(0, Math.round(aqiData.aqi * 0.08))}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1 font-medium">⏱️ Min Lost</p>
+                  <p className="text-[11px] text-amber-300 mt-1 font-medium">⏱️ Min Lost</p>
                 </div>
-                <div className="bg-white/5 rounded-xl p-3">
+                <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-3">
                   <p className="text-xl font-black text-purple-400 mt-1">
                     {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1 font-medium">🫁 Risk Level</p>
+                  <p className="text-[11px] text-purple-300 mt-1 font-medium">🫁 Risk Level</p>
                 </div>
               </div>
             </div>
@@ -296,8 +296,8 @@ export function AqiResultCard({
             {/* Research-Based Examples */}
             <div className="p-5 bg-card">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-foreground">What This Means For You</h3>
@@ -306,22 +306,32 @@ export function AqiResultCard({
               </div>
 
               <div className="space-y-2">
-                {aqiData.examples.map((example, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.08 }}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200"
-                  >
-                    <div className="p-2 rounded-lg bg-background shadow-sm border border-border/50">
-                      {getIconForExample(example)}
-                    </div>
-                    <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
-                      {example}
-                    </p>
-                  </motion.div>
-                ))}
+                {aqiData.examples.map((example, index) => {
+                  const colors = [
+                    { bg: "bg-rose-50", border: "border-rose-200", iconBg: "bg-rose-100" },
+                    { bg: "bg-amber-50", border: "border-amber-200", iconBg: "bg-amber-100" },
+                    { bg: "bg-sky-50", border: "border-sky-200", iconBg: "bg-sky-100" },
+                    { bg: "bg-emerald-50", border: "border-emerald-200", iconBg: "bg-emerald-100" },
+                  ];
+                  const colorSet = colors[index % colors.length];
+
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + index * 0.08 }}
+                      className={`flex items-start gap-3 p-3 rounded-xl ${colorSet.bg} border ${colorSet.border} hover:shadow-sm transition-all duration-200`}
+                    >
+                      <div className={`p-2 rounded-lg ${colorSet.iconBg} shadow-sm`}>
+                        {getIconForExample(example)}
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
+                        {example}
+                      </p>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </motion.div>
