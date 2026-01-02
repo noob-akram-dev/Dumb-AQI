@@ -769,15 +769,15 @@ export function AqiDashboard() {
 
                   {/* Stats Cards - Professional Design */}
                   <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
                       <p className="text-3xl font-black text-foreground">19x</p>
                       <p className="text-xs text-muted-foreground mt-1 font-medium">Delhi vs Zurich</p>
                     </div>
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
                       <p className="text-3xl font-black text-foreground">700+</p>
                       <p className="text-xs text-muted-foreground mt-1 font-medium">Cigarettes/Year*</p>
                     </div>
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border shadow-sm hover:shadow-md transition-shadow">
+                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
                       <p className="text-3xl font-black text-foreground">4.5</p>
                       <p className="text-xs text-muted-foreground mt-1 font-medium">Years Lost*</p>
                     </div>

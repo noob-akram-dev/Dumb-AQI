@@ -93,9 +93,6 @@ export function AqiResultCard({
       transition={{ duration: 0.3 }}
     >
       <Card className="premium-card overflow-hidden border-0">
-        {/* Top color bar */}
-        <div className="h-1.5" style={{ backgroundColor: aqiInfo.color }} />
-
         <CardHeader className="pb-4">
           {/* Location Section */}
           <div className="space-y-3">
@@ -104,13 +101,13 @@ export function AqiResultCard({
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border border-blue-100 dark:border-blue-900"
+                className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                   <Navigation className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">Your Location</p>
+                  <p className="text-xs font-medium text-primary uppercase tracking-wider">Your Location</p>
                   <p className="text-base font-bold text-foreground">{aqiData.userLocation}</p>
                 </div>
               </motion.div>
@@ -143,18 +140,13 @@ export function AqiResultCard({
             className="text-center py-6"
           >
             <div className="inline-flex flex-col items-center">
-              {/* AQI Number with glow */}
-              <div
-                className="relative"
-                style={{ filter: `drop-shadow(0 0 30px ${aqiInfo.color}40)` }}
+              {/* AQI Number */}
+              <span
+                className="text-8xl sm:text-9xl font-black tabular-nums tracking-tighter"
+                style={{ color: aqiInfo.color }}
               >
-                <span
-                  className="text-8xl sm:text-9xl font-black tabular-nums tracking-tighter"
-                  style={{ color: aqiInfo.color }}
-                >
-                  {aqiData.aqi}
-                </span>
-              </div>
+                {aqiData.aqi}
+              </span>
 
               {/* AQI Label */}
               <p className="text-sm text-muted-foreground font-medium mt-1 uppercase tracking-widest">
@@ -166,11 +158,10 @@ export function AqiResultCard({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-4 px-6 py-2.5 rounded-full font-bold text-sm shadow-lg"
+                className="mt-4 px-6 py-2.5 rounded-full font-bold text-sm"
                 style={{
                   backgroundColor: aqiInfo.color,
                   color: aqiData.aqi > 100 ? '#fff' : '#000',
-                  boxShadow: `0 8px 24px ${aqiInfo.color}30`
                 }}
               >
                 {aqiInfo.level}
@@ -296,8 +287,8 @@ export function AqiResultCard({
             {/* Research-Based Examples */}
             <div className="p-5 bg-card">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-violet-600" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-foreground">What This Means For You</h3>
@@ -306,32 +297,22 @@ export function AqiResultCard({
               </div>
 
               <div className="space-y-2">
-                {aqiData.examples.map((example, index) => {
-                  const colors = [
-                    { bg: "bg-rose-50", border: "border-rose-200", iconBg: "bg-rose-100" },
-                    { bg: "bg-amber-50", border: "border-amber-200", iconBg: "bg-amber-100" },
-                    { bg: "bg-sky-50", border: "border-sky-200", iconBg: "bg-sky-100" },
-                    { bg: "bg-emerald-50", border: "border-emerald-200", iconBg: "bg-emerald-100" },
-                  ];
-                  const colorSet = colors[index % colors.length];
-
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + index * 0.08 }}
-                      className={`flex items-start gap-3 p-3 rounded-xl ${colorSet.bg} border ${colorSet.border} hover:shadow-sm transition-all duration-200`}
-                    >
-                      <div className={`p-2 rounded-lg ${colorSet.iconBg} shadow-sm`}>
-                        {getIconForExample(example)}
-                      </div>
-                      <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
-                        {example}
-                      </p>
-                    </motion.div>
-                  );
-                })}
+                {aqiData.examples.map((example, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.08 }}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border"
+                  >
+                    <div className="p-2 rounded-lg bg-card border border-border">
+                      {getIconForExample(example)}
+                    </div>
+                    <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
+                      {example}
+                    </p>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </motion.div>
@@ -340,7 +321,7 @@ export function AqiResultCard({
         <CardFooter className="pt-4 pb-6 px-6">
           <Button
             onClick={onReset}
-            className="w-full h-14 text-base font-bold rounded-xl bg-foreground hover:bg-foreground/90 text-background transition-all duration-200 shadow-xl hover:shadow-2xl"
+            className="w-full h-14 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white"
           >
             <RefreshCcw className="mr-2 h-5 w-5" />
             Check Another Location
