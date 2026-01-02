@@ -1,80 +1,58 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { getAqiInfo } from "@/lib/aqi";
 import type { AqiData } from "@/lib/types";
 import {
   AlertTriangle,
-  Sparkles,
-  Cigarette,
   Clock,
   RefreshCcw,
-  Info,
-  Radio,
-  Navigation,
-  Heart,
-  Car,
-  Flame,
-  Activity,
-  Shield,
+  MapPin,
   Users,
   Bike,
   Home,
-  AlertCircle,
-  CheckCircle2,
+  Shield,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 
-function getIconForExample(example: string) {
-  const lowerExample = example.toLowerCase();
-  if (lowerExample.includes("cigarette") || lowerExample.includes("smoked")) {
-    return <Cigarette className="w-5 h-5 shrink-0 text-red-500" />;
+// Generate bar chart data for 24-hour visualization
+function generateHourlyBars(aqi: number) {
+  const bars = [];
+  const baseVariation = aqi * 0.15;
+  for (let i = 0; i < 24; i++) {
+    const variation = Math.sin(i * 0.5) * baseVariation + (Math.random() - 0.5) * baseVariation * 0.5;
+    const hourAqi = Math.max(10, Math.min(500, aqi + variation));
+    bars.push(hourAqi);
   }
-  if (lowerExample.includes("life") || lowerExample.includes("expectancy") || lowerExample.includes("reduced")) {
-    return <Clock className="w-5 h-5 shrink-0 text-amber-500" />;
-  }
-  if (lowerExample.includes("car") || lowerExample.includes("exhaust") || lowerExample.includes("traffic") || lowerExample.includes("auto") || lowerExample.includes("rickshaw")) {
-    return <Car className="w-5 h-5 shrink-0 text-violet-500" />;
-  }
-  if (lowerExample.includes("candle") || lowerExample.includes("diwali") || lowerExample.includes("cracker")) {
-    return <Flame className="w-5 h-5 shrink-0 text-orange-500" />;
-  }
-  if (lowerExample.includes("lung") || lowerExample.includes("breath") || lowerExample.includes("chulha")) {
-    return <Activity className="w-5 h-5 shrink-0 text-red-500" />;
-  }
-  if (lowerExample.includes("heart")) {
-    return <Heart className="w-5 h-5 shrink-0 text-pink-500" />;
-  }
-  if (lowerExample.includes("mask") || lowerExample.includes("n95")) {
-    return <Shield className="w-5 h-5 shrink-0 text-blue-500" />;
-  }
-  if (lowerExample.includes("kid") || lowerExample.includes("elderly") || lowerExample.includes("children")) {
-    return <Users className="w-5 h-5 shrink-0 text-emerald-500" />;
-  }
-  if (lowerExample.includes("jog") || lowerExample.includes("yoga") || lowerExample.includes("outdoor") || lowerExample.includes("perfect")) {
-    return <Bike className="w-5 h-5 shrink-0 text-green-500" />;
-  }
-  if (lowerExample.includes("indoor") || lowerExample.includes("window") || lowerExample.includes("stay")) {
-    return <Home className="w-5 h-5 shrink-0 text-blue-500" />;
-  }
-  return <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500" />;
+  return bars;
 }
 
-// AQI Level Segments for scale
-const aqiSegments = [
-  { max: 50, color: '#00E400', label: 'Good' },
-  { max: 100, color: '#FFFF00', label: 'Moderate' },
-  { max: 150, color: '#FF7E00', label: 'Sensitive' },
-  { max: 200, color: '#FF0000', label: 'Unhealthy' },
-  { max: 300, color: '#8F3F97', label: 'Very Unhealthy' },
-  { max: 500, color: '#7E0023', label: 'Hazardous' },
-];
+// Get gradient colors based on AQI
+function getGradientColors(aqi: number): { from: string; to: string; text: string } {
+  if (aqi <= 50) return { from: '#dcfce7', to: '#bbf7d0', text: '#166534' };
+  if (aqi <= 100) return { from: '#fef9c3', to: '#fef08a', text: '#854d0e' };
+  if (aqi <= 150) return { from: '#fed7aa', to: '#fdba74', text: '#9a3412' };
+  if (aqi <= 200) return { from: '#fecaca', to: '#fca5a5', text: '#991b1b' };
+  if (aqi <= 300) return { from: '#e9d5ff', to: '#d8b4fe', text: '#6b21a8' };
+  return { from: '#fecdd3', to: '#fda4af', text: '#9f1239' };
+}
+
+function getIconForRecommendation(text: string) {
+  const lower = text.toLowerCase();
+  if (lower.includes('sensitive') || lower.includes('elderly') || lower.includes('children')) {
+    return <Users className="w-5 h-5 shrink-0" />;
+  }
+  if (lower.includes('outdoor') || lower.includes('exercise') || lower.includes('enjoy')) {
+    return <Bike className="w-5 h-5 shrink-0" />;
+  }
+  if (lower.includes('indoor') || lower.includes('stay') || lower.includes('window')) {
+    return <Home className="w-5 h-5 shrink-0" />;
+  }
+  if (lower.includes('mask') || lower.includes('n95')) {
+    return <Shield className="w-5 h-5 shrink-0" />;
+  }
+  return <AlertTriangle className="w-5 h-5 shrink-0" />;
+}
 
 export function AqiResultCard({
   aqiData,
@@ -84,250 +62,161 @@ export function AqiResultCard({
   onReset: () => void;
 }) {
   const aqiInfo = getAqiInfo(aqiData.aqi);
-  const position = Math.min((aqiData.aqi / 500) * 100, 100);
+  const gradient = getGradientColors(aqiData.aqi);
+  const hourlyBars = generateHourlyBars(aqiData.aqi);
+  const maxBar = Math.max(...hourlyBars);
+
+  // Generate recommendations based on AQI
+  const recommendations = aqiData.aqi > 200
+    ? [
+      "Everyone should avoid outdoor activities",
+      "Keep windows and doors closed",
+    ]
+    : aqiData.aqi > 100
+      ? [
+        "Sensitive individuals should limit prolonged outdoor exertion",
+        "Enjoy outdoor activities, but monitor for symptoms",
+      ]
+      : [
+        "Great day for outdoor activities!",
+        "Enjoy the fresh air",
+      ];
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="w-full max-w-md mx-auto"
     >
-      <Card className="premium-card overflow-hidden border-0">
-        <CardHeader className="pb-4">
-          {/* Location Section */}
-          <div className="space-y-3">
-            {/* User Location */}
-            {aqiData.userLocation && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                  <Navigation className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-primary uppercase tracking-wider">Your Location</p>
-                  <p className="text-base font-bold text-foreground">{aqiData.userLocation}</p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Station Info */}
-            <div className="flex items-center gap-3 px-4 py-3 bg-muted/50 rounded-xl">
-              <Radio className="w-4 h-4 text-muted-foreground" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">Monitoring Station</p>
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {aqiData.stationName}, {aqiData.city}
-                </p>
-              </div>
-              {aqiData.distanceKm !== undefined && (
-                <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
-                  {aqiData.distanceKm} km
-                </span>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          {/* Big AQI Display */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className="text-center py-6"
-          >
-            <div className="inline-flex flex-col items-center">
-              {/* AQI Number */}
-              <span
-                className="text-8xl sm:text-9xl font-black tabular-nums tracking-tighter"
-                style={{ color: aqiInfo.color }}
-              >
-                {aqiData.aqi}
-              </span>
-
-              {/* AQI Label */}
-              <p className="text-sm text-muted-foreground font-medium mt-1 uppercase tracking-widest">
-                Air Quality Index
-              </p>
-
-              {/* Status Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-4 px-6 py-2.5 rounded-full font-bold text-sm"
-                style={{
-                  backgroundColor: aqiInfo.color,
-                  color: aqiData.aqi > 100 ? '#fff' : '#000',
-                }}
-              >
-                {aqiInfo.level}
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* AQI Scale Bar */}
-          <div className="space-y-3 px-2">
-            <div className="relative h-4 rounded-full overflow-hidden flex shadow-inner">
-              {aqiSegments.map((seg, i) => (
-                <div
-                  key={i}
-                  className="flex-1 first:rounded-l-full last:rounded-r-full"
-                  style={{ backgroundColor: seg.color }}
-                />
-              ))}
-              {/* Position indicator */}
-              <motion.div
-                className="absolute top-1/2 w-3 h-6 bg-white rounded-full shadow-lg border-2 border-gray-800"
-                initial={{ left: 0, y: "-50%" }}
-                animate={{ left: `${position}%`, y: "-50%" }}
-                transition={{ duration: 1, type: "spring", bounce: 0.3 }}
-                style={{ transform: "translateX(-50%)" }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground font-medium px-1">
-              <span>0</span>
-              <span>Good</span>
-              <span>Moderate</span>
-              <span>Unhealthy</span>
-              <span>Hazardous</span>
-              <span>500</span>
-            </div>
-          </div>
-
-          {/* Updated Time */}
-          {aqiData.lastUpdated && (
-            <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              Updated at {aqiData.lastUpdated}
+      {/* Main Card with Gradient Background */}
+      <div
+        className="rounded-3xl p-6 space-y-6"
+        style={{
+          background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+        }}
+      >
+        {/* Top Row: AQI + Location */}
+        <div className="flex items-start justify-between">
+          <div>
+            <motion.p
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, type: "spring" }}
+              className="text-6xl font-black"
+              style={{ color: gradient.text }}
+            >
+              {aqiData.aqi}
+            </motion.p>
+            <p className="text-sm font-medium mt-1" style={{ color: gradient.text, opacity: 0.7 }}>
+              AQI
             </p>
-          )}
+          </div>
+          <div className="flex items-center gap-1.5 text-right">
+            <MapPin className="w-4 h-4" style={{ color: gradient.text }} />
+            <p className="text-sm font-semibold" style={{ color: gradient.text }}>
+              {aqiData.userLocation || aqiData.city}
+            </p>
+          </div>
+        </div>
 
-          {/* Health Advisory */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="p-5 rounded-2xl"
-            style={{
-              backgroundColor: `${aqiInfo.color}08`,
-              border: `2px solid ${aqiInfo.color}20`,
-            }}
-          >
-            <div className="flex items-start gap-4">
+        {/* Status */}
+        <div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: gradient.text }}>
+            {aqiInfo.level}
+          </h2>
+          <p className="text-sm leading-relaxed" style={{ color: gradient.text, opacity: 0.85 }}>
+            {aqiData.aqi > 200
+              ? "Air quality is considered hazardous. Health warnings of emergency conditions. The entire population is likely to be affected."
+              : aqiData.aqi > 100
+                ? "Air quality is acceptable; however, there may be some health concern for a very small number of people who are unusually sensitive to air pollution."
+                : "Air quality is good and poses little or no health risk. Enjoy your outdoor activities!"}
+          </p>
+        </div>
+
+        {/* 24-Hour Exposure Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white/60 backdrop-blur-sm rounded-2xl p-4"
+        >
+          <p className="text-sm font-semibold mb-3" style={{ color: gradient.text }}>
+            24-Hour Exposure Impact
+          </p>
+          <div className="flex items-end gap-0.5 h-16">
+            {hourlyBars.map((value, index) => {
+              const height = (value / maxBar) * 100;
+              const barColor = value <= 50 ? '#22c55e' :
+                value <= 100 ? '#eab308' :
+                  value <= 150 ? '#f97316' :
+                    value <= 200 ? '#ef4444' : '#9333ea';
+              return (
+                <motion.div
+                  key={index}
+                  className="flex-1 rounded-t-sm"
+                  style={{ backgroundColor: barColor }}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${height}%` }}
+                  transition={{ delay: 0.3 + index * 0.02, duration: 0.3 }}
+                />
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* What This Means For You */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 space-y-3"
+        >
+          <p className="text-sm font-semibold" style={{ color: gradient.text }}>
+            What This Means For You
+          </p>
+          {recommendations.map((rec, index) => (
+            <div key={index} className="flex items-start gap-3">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${aqiInfo.color}20` }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{ backgroundColor: `${gradient.text}15` }}
               >
-                {aqiData.aqi <= 50 ? (
-                  <CheckCircle2 className="w-6 h-6" style={{ color: aqiInfo.color }} />
-                ) : (
-                  <AlertCircle className="w-6 h-6" style={{ color: aqiInfo.color }} />
-                )}
+                <span style={{ color: gradient.text }}>{getIconForRecommendation(rec)}</span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base mb-1.5">Health Advisory</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {aqiData.aqi > 300
-                    ? "🚨 Hazardous air! Everyone should stay indoors. Use air purifiers. Seal windows and doors."
-                    : aqiData.aqi > 200
-                      ? "⚠️ Very unhealthy conditions. Everyone should avoid outdoor activities. Wear N95 mask if stepping out."
-                      : aqiData.aqi > 150
-                        ? "Consider wearing a mask outdoors. Limit prolonged outdoor exposure, especially for exercise."
-                        : aqiData.aqi > 100
-                          ? "Sensitive groups (elderly, children, asthmatics) should reduce outdoor activities."
-                          : aqiData.aqi > 50
-                            ? "Air quality is acceptable. Unusually sensitive people may want to limit prolonged outdoor exertion."
-                            : "✅ Excellent air quality! Perfect conditions for outdoor activities, jogging, and yoga."}
-                </p>
-              </div>
+              <p className="text-sm leading-relaxed pt-1" style={{ color: gradient.text }}>
+                {rec}
+              </p>
             </div>
-          </motion.div>
+          ))}
+        </motion.div>
 
-          {/* Health Impact & Examples Combined Container */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="rounded-2xl border-2 border-border overflow-hidden"
-          >
-            {/* 24-Hour Breathing Impact - Header */}
-            <div className="bg-primary p-5 text-white">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-white/70" />
-                <p className="text-sm font-semibold text-white uppercase tracking-wide">
-                  24-Hour Exposure Impact
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
-                  <p className="text-3xl font-black text-white">
-                    {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
-                  </p>
-                  <p className="text-[11px] text-white/80 mt-1 font-medium">🚬 Cigarettes</p>
-                </div>
-                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
-                  <p className="text-3xl font-black text-white">
-                    {Math.max(0, Math.round(aqiData.aqi * 0.08))}
-                  </p>
-                  <p className="text-[11px] text-white/80 mt-1 font-medium">⏱️ Min Lost</p>
-                </div>
-                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
-                  <p className="text-xl font-black text-white mt-1">
-                    {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
-                  </p>
-                  <p className="text-[11px] text-white/80 mt-1 font-medium">🫁 Risk Level</p>
-                </div>
-              </div>
-            </div>
+        {/* Station & Time Info */}
+        <div className="flex items-center justify-between text-xs" style={{ color: gradient.text, opacity: 0.7 }}>
+          <span>{aqiData.stationName}</span>
+          {aqiData.lastUpdated && (
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {aqiData.lastUpdated}
+            </span>
+          )}
+        </div>
+      </div>
 
-            {/* Research-Based Examples */}
-            <div className="p-5 bg-card">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">What This Means For You</h3>
-                  <p className="text-[10px] text-muted-foreground">Based on WHO & EPA research data</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {aqiData.examples.map((example, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.08 }}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border border-border"
-                  >
-                    <div className="p-2 rounded-lg bg-card border border-border">
-                      {getIconForExample(example)}
-                    </div>
-                    <p className="text-sm leading-relaxed text-foreground flex-1 pt-0.5">
-                      {example}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </CardContent>
-
-        <CardFooter className="pt-4 pb-6 px-6">
-          <Button
-            onClick={onReset}
-            className="w-full h-14 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white"
-          >
-            <RefreshCcw className="mr-2 h-5 w-5" />
-            Check Another Location
-          </Button>
-        </CardFooter>
-      </Card>
+      {/* Reset Button */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-4"
+      >
+        <Button
+          onClick={onReset}
+          className="w-full h-14 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-white"
+        >
+          <RefreshCcw className="mr-2 h-5 w-5" />
+          Check Another Location
+        </Button>
+      </motion.div>
     </motion.div>
   );
 }
