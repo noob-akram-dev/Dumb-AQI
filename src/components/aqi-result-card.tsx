@@ -264,31 +264,31 @@ export function AqiResultCard({
             className="rounded-2xl border-2 border-border overflow-hidden"
           >
             {/* 24-Hour Breathing Impact - Header */}
-            <div className="bg-slate-900 p-5 text-white">
+            <div className="bg-primary p-5 text-white">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-slate-400" />
-                <p className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
+                <Clock className="w-4 h-4 text-white/70" />
+                <p className="text-sm font-semibold text-white uppercase tracking-wide">
                   24-Hour Exposure Impact
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3">
-                  <p className="text-3xl font-black text-red-400">
+                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
+                  <p className="text-3xl font-black text-white">
                     {Math.max(0, Math.round((aqiData.aqi - 20) / 22))}
                   </p>
-                  <p className="text-[11px] text-red-300 mt-1 font-medium">🚬 Cigarettes</p>
+                  <p className="text-[11px] text-white/80 mt-1 font-medium">🚬 Cigarettes</p>
                 </div>
-                <div className="bg-amber-500/20 border border-amber-500/30 rounded-xl p-3">
-                  <p className="text-3xl font-black text-amber-400">
+                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
+                  <p className="text-3xl font-black text-white">
                     {Math.max(0, Math.round(aqiData.aqi * 0.08))}
                   </p>
-                  <p className="text-[11px] text-amber-300 mt-1 font-medium">⏱️ Min Lost</p>
+                  <p className="text-[11px] text-white/80 mt-1 font-medium">⏱️ Min Lost</p>
                 </div>
-                <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-3">
-                  <p className="text-xl font-black text-purple-400 mt-1">
+                <div className="bg-white/10 border border-white/20 rounded-xl p-3">
+                  <p className="text-xl font-black text-white mt-1">
                     {aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None"}
                   </p>
-                  <p className="text-[11px] text-purple-300 mt-1 font-medium">🫁 Risk Level</p>
+                  <p className="text-[11px] text-white/80 mt-1 font-medium">🫁 Risk Level</p>
                 </div>
               </div>
             </div>
