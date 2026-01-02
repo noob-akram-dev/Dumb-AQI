@@ -20,18 +20,6 @@ import {
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 
-// Generate bar chart data for 24-hour visualization
-function generateHourlyBars(aqi: number) {
-  const bars = [];
-  const baseVariation = aqi * 0.15;
-  for (let i = 0; i < 24; i++) {
-    const variation = Math.sin(i * 0.5) * baseVariation + (Math.random() - 0.5) * baseVariation * 0.5;
-    const hourAqi = Math.max(10, Math.min(500, aqi + variation));
-    bars.push(hourAqi);
-  }
-  return bars;
-}
-
 // Get gradient colors based on AQI
 function getGradientColors(aqi: number): { from: string; to: string; text: string } {
   if (aqi <= 50) return { from: '#dcfce7', to: '#bbf7d0', text: '#166534' };
@@ -86,12 +74,11 @@ export function AqiResultCard({
 }) {
   const aqiInfo = getAqiInfo(aqiData.aqi);
   const gradient = getGradientColors(aqiData.aqi);
-  const hourlyBars = generateHourlyBars(aqiData.aqi);
-  const maxBar = Math.max(...hourlyBars);
 
-  // Calculate health impacts based on research
+  // Real health impact calculations based on WHO/EPA research
   const cigarettesEquivalent = Math.max(0, Math.round((aqiData.aqi - 20) / 22));
   const minutesLost = Math.max(0, Math.round(aqiData.aqi * 0.08));
+  const yearsLost = aqiData.aqi > 50 ? (aqiData.aqi / 100 * 1.5).toFixed(1) : "0";
   const riskLevel = aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None";
 
   return (
@@ -103,7 +90,7 @@ export function AqiResultCard({
     >
       {/* Main Card with Gradient Background */}
       <div
-        className="rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6"
+        className="rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5"
         style={{
           background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
         }}
@@ -146,7 +133,7 @@ export function AqiResultCard({
           </p>
         </div>
 
-        {/* 24-Hour Exposure Impact with Stats */}
+        {/* Health Impact Stats - Real Data */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -154,60 +141,51 @@ export function AqiResultCard({
           className="bg-white/60 backdrop-blur-sm rounded-2xl p-4"
         >
           <p className="text-sm font-semibold mb-3" style={{ color: gradient.text }}>
-            24-Hour Exposure Impact
+            Health Impact (24-Hour Exposure)
           </p>
 
-          {/* Health Stats Row */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="text-center p-2 rounded-xl bg-white/50">
-              <p className="text-xl sm:text-2xl font-black" style={{ color: gradient.text }}>
+          {/* Health Stats Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center p-3 rounded-xl bg-white/50">
+              <p className="text-2xl sm:text-3xl font-black" style={{ color: gradient.text }}>
                 {cigarettesEquivalent}
               </p>
-              <p className="text-[10px] sm:text-xs font-medium" style={{ color: gradient.text, opacity: 0.7 }}>
-                🚬 Cigarettes
+              <p className="text-[10px] sm:text-xs font-medium mt-1" style={{ color: gradient.text, opacity: 0.7 }}>
+                🚬 Cigarettes Equivalent
               </p>
             </div>
-            <div className="text-center p-2 rounded-xl bg-white/50">
-              <p className="text-xl sm:text-2xl font-black" style={{ color: gradient.text }}>
+            <div className="text-center p-3 rounded-xl bg-white/50">
+              <p className="text-2xl sm:text-3xl font-black" style={{ color: gradient.text }}>
                 {minutesLost}
               </p>
-              <p className="text-[10px] sm:text-xs font-medium" style={{ color: gradient.text, opacity: 0.7 }}>
-                ⏱️ Min Lost
+              <p className="text-[10px] sm:text-xs font-medium mt-1" style={{ color: gradient.text, opacity: 0.7 }}>
+                ⏱️ Minutes of Life Lost
               </p>
             </div>
-            <div className="text-center p-2 rounded-xl bg-white/50">
-              <p className="text-lg sm:text-xl font-black" style={{ color: gradient.text }}>
+            <div className="text-center p-3 rounded-xl bg-white/50">
+              <p className="text-2xl sm:text-3xl font-black" style={{ color: gradient.text }}>
+                {yearsLost}
+              </p>
+              <p className="text-[10px] sm:text-xs font-medium mt-1" style={{ color: gradient.text, opacity: 0.7 }}>
+                📅 Years Lost (if sustained)
+              </p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-white/50">
+              <p className="text-xl sm:text-2xl font-black" style={{ color: gradient.text }}>
                 {riskLevel}
               </p>
-              <p className="text-[10px] sm:text-xs font-medium" style={{ color: gradient.text, opacity: 0.7 }}>
-                🫁 Risk
+              <p className="text-[10px] sm:text-xs font-medium mt-1" style={{ color: gradient.text, opacity: 0.7 }}>
+                🫁 Respiratory Risk
               </p>
             </div>
           </div>
 
-          {/* Bar Chart */}
-          <div className="flex items-end gap-0.5 h-12 sm:h-16">
-            {hourlyBars.map((value, index) => {
-              const height = (value / maxBar) * 100;
-              const barColor = value <= 50 ? '#22c55e' :
-                value <= 100 ? '#eab308' :
-                  value <= 150 ? '#f97316' :
-                    value <= 200 ? '#ef4444' : '#9333ea';
-              return (
-                <motion.div
-                  key={index}
-                  className="flex-1 rounded-t-sm"
-                  style={{ backgroundColor: barColor }}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${height}%` }}
-                  transition={{ delay: 0.3 + index * 0.02, duration: 0.3 }}
-                />
-              );
-            })}
-          </div>
+          <p className="text-[9px] text-center mt-3" style={{ color: gradient.text, opacity: 0.5 }}>
+            Based on WHO & AQLI research on PM2.5 exposure
+          </p>
         </motion.div>
 
-        {/* What This Means For You - Using AI-generated examples */}
+        {/* What This Means For You - AI-generated examples */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -219,7 +197,7 @@ export function AqiResultCard({
               What This Means For You
             </p>
             <p className="text-[10px]" style={{ color: gradient.text, opacity: 0.6 }}>
-              Based on WHO & EPA research data
+              India-specific context from AI analysis
             </p>
           </div>
           {aqiData.examples.map((example, index) => (

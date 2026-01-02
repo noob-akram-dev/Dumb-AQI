@@ -354,7 +354,7 @@ export function AqiDashboard() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-8">
+    <div className="w-full max-w-2xl mx-auto space-y-8 px-4 sm:px-0">
       <AnimatePresence mode="wait">
         {data ? (
           <motion.div
@@ -379,347 +379,344 @@ export function AqiDashboard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="space-y-6 sm:space-y-8"
+            className="space-y-6"
           >
-            {/* Header */}
-            <header className="text-center space-y-4 sm:space-y-6 py-6 sm:py-8 px-4">
-              <motion.div
-                className="inline-block"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2">
-                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/10">
-                    <Wind className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                  </div>
-                </div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
-                  Dumb <span className="text-primary">AQI</span>
-                </h1>
-              </motion.div>
-              <motion.p
-                className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-lg mx-auto leading-relaxed px-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                Air quality for India, explained in a way you can{" "}
-                <span className="text-foreground font-semibold">
-                  actually understand
-                </span>
-                .
-              </motion.p>
-
-              {/* Install App Button */}
-              {showInstallButton && (
+            {/* Main Gradient Container */}
+            <div
+              className="rounded-3xl p-5 sm:p-8 space-y-6"
+              style={{
+                background: 'linear-gradient(135deg, #fef9c3 0%, #fef3c7 50%, #fed7aa 100%)',
+              }}
+            >
+              {/* Header */}
+              <header className="text-center space-y-4">
                 <motion.div
+                  className="inline-block"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div className="flex items-center justify-center mb-2">
+                    <img src="/icons/icon-512x512.png" alt="Dumb AQI" className="w-20 h-20 sm:w-24 sm:h-24 shadow-2xl rounded-2xl animate-float" />
+                  </div>
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-amber-900">
+                    Dumb <span className="text-orange-600">AQI</span>
+                  </h1>
+                </motion.div>
+                <motion.p
+                  className="text-amber-800 text-sm sm:text-base max-w-md mx-auto leading-relaxed"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  <Button
-                    onClick={handleInstallClick}
-                    variant="outline"
-                    className="rounded-full px-6 py-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                  Air quality for India, explained in a way you can{" "}
+                  <span className="text-amber-900 font-semibold">actually understand</span>.
+                </motion.p>
+
+                {/* Install App Button */}
+                {showInstallButton && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Install App
-                  </Button>
-                </motion.div>
-              )}
-            </header>
-
-            {/* Main Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="premium-card overflow-hidden border-0">
-                <CardHeader className="space-y-2 pb-4">
-                  <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-primary/10">
-                      <MapPin className="w-5 h-5 text-primary" />
-                    </div>
-                    Check Air Quality
-                  </CardTitle>
-                  <CardDescription className="text-base text-muted-foreground">
-                    Use your current location or select a monitoring station in India.
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="space-y-6">
-                  {/* Nearby Stations Quick Pick */}
-                  {(nearbyStations.length > 0 || loadingNearby) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Radio className="w-4 h-4 text-primary" />
-                        <p className="text-sm font-semibold text-foreground">Stations Near You</p>
-                      </div>
-
-                      {loadingNearby ? (
-                        <div className="flex items-center justify-center py-6">
-                          <LoaderCircle className="animate-spin h-5 w-5 text-primary" />
-                          <span className="ml-2 text-sm text-muted-foreground">Detecting nearby stations...</span>
-                        </div>
-                      ) : (
-                        <div className="grid gap-2">
-                          {nearbyStations.map((station, index) => (
-                            <motion.button
-                              key={station.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              onClick={() => userCoords && handleFetchAqi({ lat: userCoords.lat, lon: userCoords.lon })}
-                              disabled={loading}
-                              className="flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50"
-                            >
-                              <div
-                                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                                style={{
-                                  backgroundColor: station.aqi > 200 ? '#7E0023' :
-                                    station.aqi > 150 ? '#FF0000' :
-                                      station.aqi > 100 ? '#FF7E00' :
-                                        station.aqi > 50 ? '#FFFF00' : '#00E400',
-                                  color: station.aqi > 100 ? '#fff' : '#000'
-                                }}
-                              >
-                                {station.aqi}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                                  {station.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{station.city}</p>
-                              </div>
-                              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md">
-                                {station.distanceKm} km
-                              </span>
-                            </motion.button>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* GPS Location Button */}
-                  <div className="space-y-3">
                     <Button
-                      onClick={handleUseMyLocation}
-                      disabled={loading}
-                      className="w-full h-14 text-base font-semibold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
+                      onClick={handleInstallClick}
+                      variant="outline"
+                      className="rounded-full px-5 py-2 bg-white/60 backdrop-blur-sm border-orange-300 text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors text-sm"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Install App
+                    </Button>
+                  </motion.div>
+                )}
+              </header>
+
+              {/* Check Air Quality Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 space-y-5"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-xl bg-amber-100">
+                    <MapPin className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-amber-900">Check Air Quality</h2>
+                    <p className="text-xs sm:text-sm text-amber-700">Find the nearest monitoring station</p>
+                  </div>
+                </div>
+                {/* Nearby Stations Quick Pick */}
+                {(nearbyStations.length > 0 || loadingNearby) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold text-foreground">Stations Near You</p>
+                    </div>
+
+                    {loadingNearby ? (
+                      <div className="flex items-center justify-center py-6">
+                        <LoaderCircle className="animate-spin h-5 w-5 text-primary" />
+                        <span className="ml-2 text-sm text-muted-foreground">Detecting nearby stations...</span>
+                      </div>
+                    ) : (
+                      <div className="grid gap-2">
+                        {nearbyStations.map((station, index) => (
+                          <motion.button
+                            key={station.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            onClick={() => userCoords && handleFetchAqi({ lat: userCoords.lat, lon: userCoords.lon })}
+                            disabled={loading}
+                            className="flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50"
+                          >
+                            <div
+                              className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
+                              style={{
+                                backgroundColor: station.aqi > 200 ? '#7E0023' :
+                                  station.aqi > 150 ? '#FF0000' :
+                                    station.aqi > 100 ? '#FF7E00' :
+                                      station.aqi > 50 ? '#FFFF00' : '#00E400',
+                                color: station.aqi > 100 ? '#fff' : '#000'
+                              }}
+                            >
+                              {station.aqi}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                {station.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{station.city}</p>
+                            </div>
+                            <span className="text-xs font-medium text-primary shrink-0 whitespace-nowrap">
+                              {station.distanceKm} km
+                            </span>
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* GPS Location Button */}
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleUseMyLocation}
+                    disabled={loading}
+                    className="w-full h-14 text-base font-semibold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
+                  >
+                    {loading ? (
+                      <LoaderCircle className="animate-spin h-5 w-5 mr-2" />
+                    ) : (
+                      <Navigation className="mr-2 h-5 w-5" />
+                    )}
+                    {nearbyStations.length > 0 ? "Check My Exact Location" : "Use My Current Location"}
+                  </Button>
+                  {nearbyStations.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2 px-4 bg-muted/50 rounded-xl">
+                      📍 We'll find the nearest monitoring station to your location
+                    </p>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t-2 border-dashed border-border" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-card px-4 py-1.5 text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                      Or Select Manually
+                    </span>
+                  </div>
+                </div>
+
+                {/* Form */}
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5"
+                  >
+                    {/* State Selector */}
+                    <FormField
+                      control={form.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                            <MapPin className="w-4 h-4 text-primary" />
+                            State
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            disabled={loadingStates || loading}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
+                                <SelectValue placeholder={loadingStates ? "Loading states..." : "Select a state"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                              {states.map((state) => (
+                                <SelectItem
+                                  key={state.id}
+                                  value={state.id}
+                                  className="py-3 px-4 cursor-pointer hover:bg-amber-500 hover:text-white focus:bg-amber-600 focus:text-white data-[highlighted]:bg-amber-500 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                >
+                                  {state.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* City Selector */}
+                    {selectedState && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                                <Building2 className="w-4 h-4 text-accent" />
+                                City / District
+                              </FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                disabled={
+                                  !selectedState || loading || cities.length === 0
+                                }
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-accent/50 focus:border-accent transition-colors select-premium bg-background">
+                                    <SelectValue placeholder={cities.length === 0 && selectedState ? "Loading cities..." : "Select a city/district"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                                  {cities.map((city) => (
+                                    <SelectItem
+                                      key={city.id}
+                                      value={city.id}
+                                      className="py-3 px-4 cursor-pointer hover:bg-amber-500 hover:text-white focus:bg-amber-600 focus:text-white data-[highlighted]:bg-amber-500 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                    >
+                                      {city.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Station Selector */}
+                    {selectedCity && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <FormField
+                          control={form.control}
+                          name="station"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                                <Radio className="w-4 h-4 text-primary" />
+                                Monitoring Station
+                              </FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                disabled={
+                                  !selectedCity ||
+                                  loading ||
+                                  stations.length === 0
+                                }
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
+                                    <SelectValue placeholder={stations.length === 0 && selectedCity ? "Loading stations..." : "Select a station"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
+                                  {stations.map((station) => (
+                                    <SelectItem
+                                      key={station.id}
+                                      value={station.id}
+                                      className="py-3 px-4 cursor-pointer hover:bg-amber-500 hover:text-white focus:bg-amber-600 focus:text-white data-[highlighted]:bg-amber-500 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
+                                    >
+                                      {station.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={loading || !form.formState.isValid}
+                      className="w-full h-14 text-lg font-bold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
-                        <LoaderCircle className="animate-spin h-5 w-5 mr-2" />
+                        <LoaderCircle className="animate-spin h-6 w-6" />
                       ) : (
-                        <Navigation className="mr-2 h-5 w-5" />
+                        <>
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Get Dumb AQI
+                        </>
                       )}
-                      {nearbyStations.length > 0 ? "Check My Exact Location" : "Use My Current Location"}
                     </Button>
-                    {nearbyStations.length === 0 && (
-                      <p className="text-xs text-muted-foreground text-center py-2 px-4 bg-muted/50 rounded-xl">
-                        📍 We'll find the nearest monitoring station to your location
-                      </p>
-                    )}
-                  </div>
+                  </form>
+                </Form>
+              </motion.div>
+              {/* End Check Air Quality Card */}
 
-                  {/* Divider */}
-                  <div className="relative py-2">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t-2 border-dashed border-border" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-card px-4 py-1.5 text-xs font-semibold uppercase text-muted-foreground tracking-wide">
-                        Or Select Manually
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Form */}
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-5"
-                    >
-                      {/* State Selector */}
-                      <FormField
-                        control={form.control}
-                        name="state"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                              <MapPin className="w-4 h-4 text-primary" />
-                              State
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              disabled={loadingStates || loading}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
-                                  <SelectValue placeholder={loadingStates ? "Loading states..." : "Select a state"} />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
-                                {states.map((state) => (
-                                  <SelectItem
-                                    key={state.id}
-                                    value={state.id}
-                                    className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
-                                  >
-                                    {state.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* City Selector */}
-                      {selectedState && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <FormField
-                            control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                                  <Building2 className="w-4 h-4 text-accent" />
-                                  City / District
-                                </FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  disabled={
-                                    !selectedState || loading || cities.length === 0
-                                  }
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-accent/50 focus:border-accent transition-colors select-premium bg-background">
-                                      <SelectValue placeholder={cities.length === 0 && selectedState ? "Loading cities..." : "Select a city/district"} />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
-                                    {cities.map((city) => (
-                                      <SelectItem
-                                        key={city.id}
-                                        value={city.id}
-                                        className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
-                                      >
-                                        {city.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </motion.div>
-                      )}
-
-                      {/* Station Selector */}
-                      {selectedCity && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <FormField
-                            control={form.control}
-                            name="station"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                                  <Radio className="w-4 h-4 text-primary" />
-                                  Monitoring Station
-                                </FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  disabled={
-                                    !selectedCity ||
-                                    loading ||
-                                    stations.length === 0
-                                  }
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="h-12 text-base rounded-xl border-2 border-border hover:border-primary/50 focus:border-primary transition-colors select-premium bg-background">
-                                      <SelectValue placeholder={stations.length === 0 && selectedCity ? "Loading stations..." : "Select a station"} />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="rounded-xl border-2 shadow-lg max-h-[300px]">
-                                    {stations.map((station) => (
-                                      <SelectItem
-                                        key={station.id}
-                                        value={station.id}
-                                        className="py-3 px-4 cursor-pointer hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white data-[highlighted]:bg-blue-600 data-[highlighted]:text-white rounded-lg mx-1 my-0.5 transition-colors"
-                                      >
-                                        {station.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </motion.div>
-                      )}
-
-                      {/* Submit Button */}
-                      <Button
-                        type="submit"
-                        disabled={loading || !form.formState.isValid}
-                        className="w-full h-14 text-lg font-bold btn-premium bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? (
-                          <LoaderCircle className="animate-spin h-6 w-6" />
-                        ) : (
-                          <>
-                            <Sparkles className="mr-2 h-5 w-5" />
-                            Get Dumb AQI
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* India vs World Comparison Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Card className="premium-card overflow-hidden border-0">
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-xl font-bold flex items-center justify-center gap-2">
+              {/* India vs World Comparison Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6"
+              >
+                <div className="text-center mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-amber-900 flex items-center justify-center gap-2">
                     India vs World
                     <span className="text-xl">🌍</span>
-                  </CardTitle>
-                  <CardDescription>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-amber-700">
                     Typical AQI comparison during winter months
-                  </CardDescription>
-                </CardHeader>
+                  </p>
+                </div>
 
-                <CardContent className="space-y-6">
+                <div className="space-y-6">
                   {/* Side by side comparison */}
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Indian Cities */}
@@ -820,28 +817,30 @@ export function AqiDashboard() {
                   </div>
 
                   {/* Stats Cards - Professional Design */}
-                  <div className="grid grid-cols-3 gap-3 pt-2">
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
-                      <p className="text-3xl font-black text-foreground">19x</p>
-                      <p className="text-xs text-muted-foreground mt-1 font-medium">Delhi vs Zurich</p>
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
+                    <div className="text-center p-3 sm:p-4 rounded-xl bg-card border-2 border-border">
+                      <p className="text-2xl sm:text-3xl font-black text-foreground">19x</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium leading-tight">Delhi vs<br />Zurich</p>
                     </div>
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
-                      <p className="text-3xl font-black text-foreground">700+</p>
-                      <p className="text-xs text-muted-foreground mt-1 font-medium">Cigarettes/Year*</p>
+                    <div className="text-center p-3 sm:p-4 rounded-xl bg-card border-2 border-border">
+                      <p className="text-2xl sm:text-3xl font-black text-foreground">700+</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium leading-tight">Cigarettes<br />Per Year*</p>
                     </div>
-                    <div className="text-center p-4 rounded-xl bg-card border-2 border-border">
-                      <p className="text-3xl font-black text-foreground">4.5</p>
-                      <p className="text-xs text-muted-foreground mt-1 font-medium">Years Lost*</p>
+                    <div className="text-center p-3 sm:p-4 rounded-xl bg-white/60 backdrop-blur-sm">
+                      <p className="text-2xl sm:text-3xl font-black text-amber-900">4.5</p>
+                      <p className="text-[10px] sm:text-xs text-amber-700 mt-1 font-medium leading-tight">Years<br />Lost*</p>
                     </div>
                   </div>
 
                   {/* Footnote */}
-                  <p className="text-[10px] text-muted-foreground text-center pt-1">
+                  <p className="text-[9px] text-amber-700 text-center pt-1">
                     * Based on WHO & AQLI studies on PM2.5 exposure in Delhi
                   </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+                </div>
+              </motion.div>
+              {/* End Comparison Section */}
+            </div>
+            {/* End Main Gradient Container */}
           </motion.div>
         )}
       </AnimatePresence>

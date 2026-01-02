@@ -4,8 +4,8 @@
   "description": "Air Quality Index for India, explained in a way you can actually understand.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f7fa",
-  "theme_color": "#2563eb",
+  "background_color": "#fff7ed",
+  "theme_color": "#f97316",
   "orientation": "portrait-primary",
   "icons": [
     {
