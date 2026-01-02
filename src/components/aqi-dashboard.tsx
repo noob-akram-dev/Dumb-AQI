@@ -383,9 +383,9 @@ export function AqiDashboard() {
           >
             {/* Main Gradient Container */}
             <div
-              className="rounded-3xl p-5 sm:p-8 space-y-6 noise-texture"
+              className="rounded-3xl p-6 sm:p-8 space-y-6 noise-texture"
               style={{
-                background: 'linear-gradient(135deg, #fef9c3 0%, #fef3c7 50%, #fed7aa 100%)',
+                background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 40%, #fdba74 100%)',
               }}
             >
               {/* Header */}
@@ -437,15 +437,15 @@ export function AqiDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 space-y-5"
+                className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 sm:p-6 space-y-5"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-xl bg-amber-100">
-                    <MapPin className="w-5 h-5 text-amber-600" />
+                  <div className="p-2.5 rounded-xl bg-amber-100">
+                    <MapPin className="w-6 h-6 text-amber-600" />
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-amber-900">Check Air Quality</h2>
-                    <p className="text-xs sm:text-sm text-amber-700">Find the nearest monitoring station</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-amber-900">Check Air Quality</h2>
+                    <p className="text-sm sm:text-base text-amber-700">Find the nearest monitoring station</p>
                   </div>
                 </div>
                 {/* Nearby Stations Quick Pick */}
@@ -466,7 +466,7 @@ export function AqiDashboard() {
                         <span className="ml-2 text-sm text-muted-foreground">Detecting nearby stations...</span>
                       </div>
                     ) : (
-                      <div className="grid gap-2 w-full">
+                      <div className="grid gap-3 w-full">
                         {nearbyStations.map((station, index) => (
                           <motion.button
                             key={station.id}
@@ -475,10 +475,10 @@ export function AqiDashboard() {
                             transition={{ delay: index * 0.1 }}
                             onClick={() => userCoords && handleFetchAqi({ lat: userCoords.lat, lon: userCoords.lon })}
                             disabled={loading}
-                            className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50 overflow-hidden"
+                            className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all text-left group disabled:opacity-50 overflow-hidden"
                           >
                             <div
-                              className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm shrink-0"
+                              className="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-base shrink-0"
                               style={{
                                 backgroundColor: station.aqi > 200 ? '#7E0023' :
                                   station.aqi > 150 ? '#FF0000' :
@@ -490,12 +490,12 @@ export function AqiDashboard() {
                               {station.aqi}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                              <p className="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                                 {station.name}
                               </p>
-                              <p className="text-xs text-muted-foreground">{station.city}</p>
+                              <p className="text-sm text-muted-foreground">{station.city}</p>
                             </div>
-                            <span className="text-xs font-medium text-primary shrink-0 whitespace-nowrap">
+                            <span className="text-sm font-medium text-primary shrink-0 whitespace-nowrap">
                               {station.distanceKm} km
                             </span>
                           </motion.button>
