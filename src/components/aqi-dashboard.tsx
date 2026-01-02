@@ -383,7 +383,7 @@ export function AqiDashboard() {
           >
             {/* Main Gradient Container */}
             <div
-              className="rounded-3xl p-5 sm:p-8 space-y-6"
+              className="rounded-3xl p-5 sm:p-8 space-y-6 noise-texture"
               style={{
                 background: 'linear-gradient(135deg, #fef9c3 0%, #fef3c7 50%, #fed7aa 100%)',
               }}
