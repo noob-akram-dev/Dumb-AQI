@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from '@/components/ui/toaster';
+import { OneSignalProvider } from '@/components/onesignal-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -46,6 +48,8 @@ export default function RootLayout({
       <body className="font-body antialiased" style={{ fontFamily: "'Inter', sans-serif" }}>
         {children}
         <Toaster />
+        <Analytics />
+        <OneSignalProvider />
         <script
           dangerouslySetInnerHTML={{
             __html: `
