@@ -76,10 +76,25 @@ export function AqiResultCard({
   const gradient = getGradientColors(aqiData.aqi);
 
   // Real health impact calculations based on WHO/EPA research
-  const cigarettesEquivalent = Math.max(0, Math.round((aqiData.aqi - 20) / 22));
-  const minutesLost = Math.max(0, Math.round(aqiData.aqi * 0.08));
-  const yearsLost = aqiData.aqi > 50 ? (aqiData.aqi / 100 * 1.5).toFixed(1) : "0";
-  const riskLevel = aqiData.aqi > 200 ? "High" : aqiData.aqi > 100 ? "Medium" : aqiData.aqi > 50 ? "Low" : "None";
+  // Cigarettes: ~22 µg/m³ PM2.5 = 1 cigarette, AQI roughly correlates
+  const cigarettesEquivalent = aqiData.aqi <= 50 ? 0 : Math.round((aqiData.aqi - 50) / 22);
+
+  // Minutes of life lost per day of exposure (based on AQLI research)
+  const minutesLost = aqiData.aqi <= 50 ? 0 : Math.round((aqiData.aqi - 50) * 0.12);
+
+  // Years of life expectancy lost if this AQI is sustained (AQLI methodology)
+  const yearsLost = aqiData.aqi <= 50 ? "0" : ((aqiData.aqi - 50) / 100 * 2.1).toFixed(1);
+
+  // Risk level with 6 categories matching AQI levels
+  const getRiskLevel = (aqi: number): string => {
+    if (aqi <= 50) return "Minimal";
+    if (aqi <= 100) return "Low";
+    if (aqi <= 150) return "Moderate";
+    if (aqi <= 200) return "High";
+    if (aqi <= 300) return "Very High";
+    return "Severe";
+  };
+  const riskLevel = getRiskLevel(aqiData.aqi);
 
   return (
     <motion.div
@@ -125,11 +140,17 @@ export function AqiResultCard({
             {aqiInfo.level}
           </h2>
           <p className="text-xs sm:text-sm leading-relaxed" style={{ color: gradient.text, opacity: 0.85 }}>
-            {aqiData.aqi > 200
-              ? "Air quality is hazardous. Everyone should avoid outdoor activities."
-              : aqiData.aqi > 100
-                ? "Air quality is unhealthy for sensitive groups. Limit prolonged outdoor exertion."
-                : "Air quality is good and poses little or no health risk."}
+            {aqiData.aqi <= 50
+              ? "Air quality is excellent. Perfect for all outdoor activities. Enjoy the fresh air!"
+              : aqiData.aqi <= 100
+                ? "Air quality is acceptable. Unusually sensitive people should consider limiting prolonged outdoor exertion."
+                : aqiData.aqi <= 150
+                  ? "Members of sensitive groups may experience health effects. General public is less likely to be affected."
+                  : aqiData.aqi <= 200
+                    ? "Everyone may begin to experience health effects. Sensitive groups should avoid outdoor activities."
+                    : aqiData.aqi <= 300
+                      ? "Health warnings of emergency conditions. Everyone is at serious health risk."
+                      : "Health alert: everyone may experience serious health effects. Avoid all outdoor activities."}
           </p>
         </div>
 

@@ -819,13 +819,13 @@ export function AqiDashboard() {
 
                     {/* Stats Cards - Professional Design */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
-                      <div className="text-center p-3 sm:p-4 rounded-xl bg-card border-2 border-border">
-                        <p className="text-2xl sm:text-3xl font-black text-foreground">19x</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium leading-tight">Delhi vs<br />Zurich</p>
+                      <div className="text-center p-3 sm:p-4 rounded-xl bg-white/60 backdrop-blur-sm">
+                        <p className="text-2xl sm:text-3xl font-black text-amber-900">19x</p>
+                        <p className="text-[10px] sm:text-xs text-amber-700 mt-1 font-medium leading-tight">Delhi vs<br />Zurich</p>
                       </div>
-                      <div className="text-center p-3 sm:p-4 rounded-xl bg-card border-2 border-border">
-                        <p className="text-2xl sm:text-3xl font-black text-foreground">700+</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-medium leading-tight">Cigarettes<br />Per Year*</p>
+                      <div className="text-center p-3 sm:p-4 rounded-xl bg-white/60 backdrop-blur-sm">
+                        <p className="text-2xl sm:text-3xl font-black text-amber-900">700+</p>
+                        <p className="text-[10px] sm:text-xs text-amber-700 mt-1 font-medium leading-tight">Cigarettes<br />Per Year*</p>
                       </div>
                       <div className="text-center p-3 sm:p-4 rounded-xl bg-white/60 backdrop-blur-sm">
                         <p className="text-2xl sm:text-3xl font-black text-amber-900">4.5</p>
